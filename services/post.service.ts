@@ -69,4 +69,105 @@ export const PostService = {
       where: { id },
     });
   },
+
+  // Fungsi BARU: Create Post dengan "Sihir" Relasi
+  createPost: async (data: {
+    title: string;
+    slug: string;
+    content: string;
+    categoryName: string;
+    isPublished: boolean;
+    coverImage: string | null;
+  }) => {
+    // 1. SIHIR USER: Cari user pertama. Kalau kosong, bikin user dummy otomatis.
+    let user = await prisma.user.findFirst();
+    if (!user) {
+      user = await prisma.user.create({
+        data: {
+          name: "Bima Sena",
+          username: "bimasena",
+          password: "hashed_password",
+        },
+      });
+    }
+
+    // 2. Insert ke tabel Post
+    return await prisma.post.create({
+      data: {
+        title: data.title,
+        slug: data.slug,
+        content: data.content,
+        isPublished: data.isPublished,
+        coverImage: data.coverImage,
+        // Hubungkan dengan User ID
+        author: { connect: { id: user.id } },
+        // SIHIR KATEGORI: Cari kategori. Kalau gak ada, buatin otomatis!
+        category: {
+          connectOrCreate: {
+            where: {
+              slug: data.categoryName.toLowerCase().replace(/\s+/g, "-"),
+            },
+            create: {
+              name: data.categoryName,
+              slug: data.categoryName.toLowerCase().replace(/\s+/g, "-"),
+            },
+          },
+        },
+      },
+    });
+  },
+
+  // Fungsi BARU: Ambil daftar nama kategori unik
+  getUniqueCategories: async () => {
+    const categories = await prisma.category.findMany({
+      select: { name: true },
+      orderBy: { name: "asc" },
+    });
+    return categories.map((c) => c.name);
+  },
+
+  // 1. Ambil 1 data post (lengkap dengan nama kategorinya)
+  getPostByIdandIncludeCategory: async (id: string) => {
+    const post = await prisma.post.findUnique({
+      where: { id },
+      include: { category: true },
+    });
+
+    if (!post) return null;
+
+    return {
+      id: post.id,
+      title: post.title,
+      slug: post.slug,
+      content: post.content,
+      coverImage: post.coverImage,
+      status: post.isPublished ? "Published" : "Draft",
+      category: post.category?.name || "",
+    };
+  },
+
+  // 2. Update post yang sudah ada
+  updatePost: async (id: string, data: any) => {
+    return await prisma.post.update({
+      where: { id },
+      data: {
+        title: data.title,
+        slug: data.slug,
+        content: data.content,
+        isPublished: data.isPublished,
+        coverImage: data.coverImage,
+        category: {
+          connectOrCreate: {
+            where: {
+              slug: data.categoryName.toLowerCase().replace(/[\s\W-]+/g, "-"),
+            },
+            create: {
+              name: data.categoryName,
+              slug: data.categoryName.toLowerCase().replace(/[\s\W-]+/g, "-"),
+            },
+          },
+        },
+      },
+    });
+  },
 };
