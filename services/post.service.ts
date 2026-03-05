@@ -1,11 +1,26 @@
 import { prisma } from "@/db/client";
 
+// Tambahkan interface ini di paling atas file atau di dalam objek PostService
+interface CreatePostInput {
+  title: string;
+  slug: string;
+  content: string;
+  categoryName: string;
+  isPublished: boolean;
+  coverImage: string | null;
+  authorId: string; // <--- SEKARANG WAJIB SETOR ID PENULIS
+}
+
 export const PostService = {
   // Fungsi 1: Ambil statistik angka
-  getDashboardStats: async () => {
-    const total = await prisma.post.count();
-    const published = await prisma.post.count({ where: { isPublished: true } });
-    const drafts = await prisma.post.count({ where: { isPublished: false } });
+  getDashboardStats: async (userId: string) => {
+    const total = await prisma.post.count({ where: { authorId: userId } });
+    const published = await prisma.post.count({
+      where: { isPublished: true, authorId: userId },
+    });
+    const drafts = await prisma.post.count({
+      where: { isPublished: false, authorId: userId },
+    });
 
     return { total, published, drafts };
   },
@@ -30,12 +45,16 @@ export const PostService = {
     }));
   },
 
-  // Fungsi BARU: Ambil semua posts untuk halaman tabel
-  getAllPosts: async () => {
+  // Fungsi 3: Ambil semua post milik user tertentu (untuk halaman /posts)
+  // Tambahkan parameter userId di sini
+  getAllPosts: async (userId: string) => {
     const rawPosts = await prisma.post.findMany({
+      where: {
+        authorId: userId, // <-- FILTER HANYA MILIK USER INI
+      },
       orderBy: { createdAt: "desc" },
       include: {
-        category: true, // Bawa data dari tabel kategori sekalian!
+        category: true,
       },
     });
 
@@ -51,11 +70,9 @@ export const PostService = {
         day: "numeric",
         year: "numeric",
       }),
-      // Kita set 0 dulu karena belum bikin kolom views di database
       views: 0,
     }));
   },
-
   // Fungsi BARU: Ambil 1 post spesifik berdasarkan ID untuk di-edit
   getPostById: async (id: string) => {
     return await prisma.post.findUnique({
@@ -70,31 +87,10 @@ export const PostService = {
     });
   },
 
-  // Fungsi BARU: Create Post dengan "Sihir" Relasi
-  createPost: async (data: {
-    title: string;
-    slug: string;
-    content: string;
-    categoryName: string;
-    isPublished: boolean;
-    coverImage: string | null;
-  }) => {
-    // 1. SIHIR USER: Cari user pertama. Kalau kosong, bikin user dummy otomatis.
-    let user = await prisma.user.findFirst();
+  // Fungsi Create Post yang sudah diperbaiki
+  createPost: async (data: CreatePostInput) => {
+    // Kita hapus "Sihir User" dummy yang lama, karena kita sudah punya authorId asli
 
-    if (!user) {
-      user = await prisma.user.create({
-        data: {
-          email: "admin@bimasena.com", // <-- INI YANG BIKIN ERROR (Tadi Kelupaan!)
-          name: "Bima Sena Adji",
-          username: "bimasena",
-          // Catatan: Kalau di schema.prisma kamu kolom password sudah tidak ada, hapus saja baris password di bawah ini.
-          // password: "hashed_password",
-        },
-      });
-    }
-
-    // 2. Insert ke tabel Post
     return await prisma.post.create({
       data: {
         title: data.title,
@@ -102,9 +98,11 @@ export const PostService = {
         content: data.content,
         isPublished: data.isPublished,
         coverImage: data.coverImage,
-        // Hubungkan dengan User ID
-        author: { connect: { id: user.id } },
-        // SIHIR KATEGORI: Cari kategori. Kalau gak ada, buatin otomatis!
+        // Hubungkan langsung dengan User ID yang dikirim dari Action
+        author: {
+          connect: { id: data.authorId },
+        },
+        // Sihir Kategori tetap dipertahankan
         category: {
           connectOrCreate: {
             where: {
@@ -149,7 +147,7 @@ export const PostService = {
     };
   },
 
-  // 2. Update post yang sudah ada
+  // Perbaiki juga fungsi updatePost supaya aman
   updatePost: async (id: string, data: any) => {
     return await prisma.post.update({
       where: { id },

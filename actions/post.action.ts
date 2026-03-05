@@ -4,6 +4,8 @@ import { PostService } from "@/services/post.service";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
+import { prisma } from "@/db/client";
+import { createClient } from "@/lib/supabase/server";
 
 export async function deletePostAction(id: string) {
   try {
@@ -23,7 +25,24 @@ export async function deletePostAction(id: string) {
 // Sekarang kita menerima tipe data FormData bawaan HTML
 export async function createPostAction(formData: FormData) {
   try {
-    // 1. Ekstrak data teks biasa
+    // 1. Ambil Session User yang sedang login
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user || !user.email) {
+      return { success: false, error: "Kamu harus login dulu bos!" };
+    }
+
+    // Ambil ID asli dari Prisma (karena table Post butuh authorId)
+    const author = await prisma.user.findUnique({
+      where: { email: user.email },
+    });
+
+    if (!author) return { success: false, error: "User tidak ditemukan." };
+
+    // 2. Ekstrak data teks
     const title = formData.get("title") as string;
     const content = formData.get("content") as string;
     const slug =
@@ -32,48 +51,50 @@ export async function createPostAction(formData: FormData) {
     const categoryName = formData.get("category") as string;
     const isPublished = formData.get("status") === "Published";
 
-    // 2. Ekstrak File Gambar
+    // 3. Ekstrak & Upload File Gambar
     const file = formData.get("coverImage") as File | null;
-    let coverImageUrl = null; // Nilai default kalau user gak upload gambar
+    let coverImageUrl = null;
 
-    // 3. PROSES UPLOAD KE CLOUD STORAGE
     if (file && file.size > 0) {
-      // Bikin nama file unik (biar gak bentrok kalau ada gambar namanya sama)
       const fileExt = file.name.split(".").pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const fileName = `posts/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
 
-      // Upload fisik file-nya ke bucket 'blog-images'
+      // SAMAKAN NAMA BUCKET: 'avatars'
       const { error: uploadError } = await supabase.storage
-        .from("blog-images")
+        .from("avatars")
         .upload(fileName, file);
 
-      if (uploadError) throw new Error("Gagal upload gambar ke storage.");
+      if (uploadError)
+        throw new Error("Gagal upload gambar: " + uploadError.message);
 
-      // Ambil Link (URL) publiknya
       const {
         data: { publicUrl },
-      } = supabase.storage.from("blog-images").getPublicUrl(fileName);
-
-      // Simpan URL-nya ke variabel kita
+      } = supabase.storage.from("avatars").getPublicUrl(fileName);
       coverImageUrl = publicUrl;
     }
 
-    // 4. Simpan URL ke Database (Tabel Post)
+    // 4. Simpan ke Database via Service
+    // PASTIKAN PostService.createPost sudah menerima authorId
     await PostService.createPost({
       title,
       slug,
       content,
       categoryName,
       isPublished,
-      coverImage: coverImageUrl, // YAY! Sekarang yang masuk DB murni cuma URL (teks pendek)
+      coverImage: coverImageUrl,
+      authorId: author.id, // KIRIM ID PENULIS ASLI
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Gagal membuat post:", error);
-    return { success: false, error: "Gagal menyimpan tulisan." };
+    return {
+      success: false,
+      error: error.message || "Gagal menyimpan tulisan.",
+    };
   }
 
+  // Bersihkan cache agar Dashboard & All Posts langsung update
   revalidatePath("/posts");
-  revalidatePath("/editor");
+  revalidatePath("/dashboard");
   redirect("/posts");
 }
 
