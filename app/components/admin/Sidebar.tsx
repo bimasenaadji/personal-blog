@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   FileText,
@@ -9,21 +9,47 @@ import {
   Settings,
   LogOut,
 } from "lucide-react";
+import { useState } from "react";
+import toast from "react-hot-toast";
+import { signOutAction } from "@/actions/auth.action";
+import Image from "next/image";
 
 interface SidebarProps {
   isDarkMode: boolean;
-  onLogout?: () => void;
+  // Tambahkan data profile yang akan diterima dari Layout
+  userProfile: {
+    name: string | null;
+    avatar: string | null;
+    email: string;
+  } | null;
 }
-
-export default function Sidebar({ isDarkMode, onLogout }: SidebarProps) {
+export default function Sidebar({ isDarkMode, userProfile }: SidebarProps) {
+  console.log("Avatar URL di Sidebar:", userProfile?.avatar);
   const pathname = usePathname(); // Ini keajaiban Next.js untuk ngecek kita lagi di URL mana
+  const router = useRouter(); // Buat mindahin halaman
+  const [isLoggingOut, setIsLoggingOut] = useState(false); // State untuk efek loading
+
+  const displayName = userProfile?.name || "Admin User";
+  const avatarUrl = userProfile?.avatar;
 
   // Kita ubah id jadi href (URL tujuan)
   const navItems = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/posts", label: "All Posts", icon: FileText },
     { href: "/editor", label: "Create New", icon: PenTool },
+    { href: "/settings", label: "Settings", icon: Settings },
   ] as const;
+
+  // Fungsi sakti untuk Logout
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    toast.loading("Logging out...", { id: "logout-toast" });
+
+    await signOutAction(); // Panggil server action yang hapus sesi Supabase
+
+    toast.success("Berhasil keluar!", { id: "logout-toast" });
+    router.push("/login"); // Tendang balik ke halaman login
+  };
 
   return (
     <aside
@@ -80,35 +106,53 @@ export default function Sidebar({ isDarkMode, onLogout }: SidebarProps) {
       <div
         className={`p-4 border-t transition-colors ${isDarkMode ? "border-zinc-800" : "border-zinc-200"} space-y-3`}
       >
-        <div className="flex items-center gap-3 px-4 py-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-blue-500" />
+        <Link
+          href="/settings"
+          className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all cursor-pointer ${
+            isDarkMode ? "hover:bg-zinc-800/50" : "hover:bg-zinc-100"
+          }`}
+        >
+          {/* 1. CEK BAGIAN INI: Logika Tampilan Avatar */}
+          <div className="relative w-10 h-10 rounded-full overflow-hidden border border-zinc-200 shrink-0 bg-zinc-200">
+            {userProfile?.avatar ? (
+              <Image
+                src={userProfile.avatar}
+                alt="Profile"
+                fill
+                className="object-cover"
+                unoptimized // Biar Next.js nggak rewel optimasi lagi
+              />
+            ) : (
+              // Kalau avatar di DB null, tampilkan gradient ini
+              <div className="w-full h-full bg-gradient-to-br from-emerald-400 to-blue-500" />
+            )}
+          </div>
+
           <div className="min-w-0">
             <p
-              className={`text-sm font-medium truncate transition-colors ${
-                isDarkMode ? "text-white" : "text-zinc-900"
-              }`}
+              className={`text-sm font-medium truncate transition-colors ${isDarkMode ? "text-white" : "text-zinc-900"}`}
             >
-              Bima Sena Adji
+              {userProfile?.name || "Admin"}
             </p>
             <p
-              className={`text-xs truncate transition-colors ${
-                isDarkMode ? "text-zinc-400" : "text-zinc-600"
-              }`}
+              className={`text-xs truncate transition-colors ${isDarkMode ? "text-zinc-400" : "text-zinc-600"}`}
             >
-              Admin
+              {userProfile?.email}
             </p>
           </div>
-        </div>
+        </Link>
+        {/* Tombol Logout yang sudah hidup! */}
         <button
-          onClick={onLogout}
-          className={`w-full flex items-center gap-3 px-4 py-2 rounded-2xl transition-all text-sm ${
+          onClick={handleLogout}
+          disabled={isLoggingOut}
+          className={`w-full flex items-center gap-3 px-4 py-2 rounded-2xl transition-all text-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
             isDarkMode
               ? "text-red-400 hover:bg-red-500/10"
               : "text-red-600 hover:bg-red-50"
           }`}
         >
           <LogOut size={18} />
-          <span>Logout</span>
+          <span>{isLoggingOut ? "Sedang keluar..." : "Logout"}</span>
         </button>
       </div>
     </aside>

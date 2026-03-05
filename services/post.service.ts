@@ -81,12 +81,15 @@ export const PostService = {
   }) => {
     // 1. SIHIR USER: Cari user pertama. Kalau kosong, bikin user dummy otomatis.
     let user = await prisma.user.findFirst();
+
     if (!user) {
       user = await prisma.user.create({
         data: {
-          name: "Bima Sena",
+          email: "admin@bimasena.com", // <-- INI YANG BIKIN ERROR (Tadi Kelupaan!)
+          name: "Bima Sena Adji",
           username: "bimasena",
-          password: "hashed_password",
+          // Catatan: Kalau di schema.prisma kamu kolom password sudah tidak ada, hapus saja baris password di bawah ini.
+          // password: "hashed_password",
         },
       });
     }
