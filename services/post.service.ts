@@ -8,7 +8,7 @@ interface CreatePostInput {
   categoryName: string;
   isPublished: boolean;
   coverImage: string | null;
-  authorId: string; // <--- SEKARANG WAJIB SETOR ID PENULIS
+  authorId: string;
 }
 
 export const PostService = {

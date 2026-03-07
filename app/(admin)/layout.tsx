@@ -24,16 +24,6 @@ export default async function Layout({
     });
   }
 
-  if (user?.email) {
-    userProfile = await prisma.user.findUnique({
-      where: { email: user.email },
-      select: { name: true, avatar: true, email: true },
-    });
-
-    // CEK DI TERMINAL VS CODE LO, BUKAN DI BROWSER!
-    console.log("ISI DATA DARI PRISMA:", userProfile);
-  }
-
   // 2. Langsung lempar ke Client Layout
   return (
     <AdminLayoutClient userProfile={userProfile}>{children}</AdminLayoutClient>

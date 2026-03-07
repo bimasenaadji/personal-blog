@@ -16,7 +16,6 @@ import Image from "next/image";
 
 interface SidebarProps {
   isDarkMode: boolean;
-  // Tambahkan data profile yang akan diterima dari Layout
   userProfile: {
     name: string | null;
     avatar: string | null;
@@ -24,10 +23,9 @@ interface SidebarProps {
   } | null;
 }
 export default function Sidebar({ isDarkMode, userProfile }: SidebarProps) {
-  console.log("Avatar URL di Sidebar:", userProfile?.avatar);
-  const pathname = usePathname(); // Ini keajaiban Next.js untuk ngecek kita lagi di URL mana
-  const router = useRouter(); // Buat mindahin halaman
-  const [isLoggingOut, setIsLoggingOut] = useState(false); // State untuk efek loading
+  const pathname = usePathname();
+  const router = useRouter();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const displayName = userProfile?.name || "Admin User";
   const avatarUrl = userProfile?.avatar;

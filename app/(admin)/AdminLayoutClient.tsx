@@ -7,7 +7,7 @@ import Header from "../components/admin/Header";
 
 export default function AdminLayoutClient({
   children,
-  userProfile, // <-- Terima data profil di sini
+  userProfile,
 }: {
   children: React.ReactNode;
   userProfile: any;
