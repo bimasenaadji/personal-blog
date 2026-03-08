@@ -11,7 +11,6 @@ import Image from "next/image";
 import { supabase } from "@/lib/supabase/client";
 
 interface SettingsViewProps {
-  isDarkMode: boolean;
   userProfile: {
     name: string | null;
     email: string;
@@ -20,32 +19,23 @@ interface SettingsViewProps {
   };
 }
 
-export default function SettingsView({
-  isDarkMode,
-  userProfile,
-}: SettingsViewProps) {
+export default function SettingsView({ userProfile }: SettingsViewProps) {
   const [fullName, setFullName] = useState(userProfile.name || "");
-  const [email] = useState(userProfile.email || ""); // Hapus setEmail karena email akan kita kunci
+  const [email] = useState(userProfile.email || "");
   const [bio, setBio] = useState(userProfile.bio || "");
-
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  // State untuk efek loading tombol
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
-
-  // State khusus Avatar
   const [avatarUrl, setAvatarUrl] = useState(userProfile.avatar || "");
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // FUNGSI 3: Handle Upload Avatar
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validasi ukuran (maksimal 5MB)
     if (file.size > 5 * 1024 * 1024) {
       toast.error("Ukuran foto maksimal 5MB!");
       return;
@@ -55,30 +45,24 @@ export default function SettingsView({
     toast.loading("Mengunggah foto...", { id: "avatar" });
 
     try {
-      // 1. Buat nama file unik
       const fileExt = file.name.split(".").pop();
       const fileName = `avatar-${Date.now()}.${fileExt}`;
-      const filePath = `avatars/${fileName}`; // Kamu bisa sesuaikan foldernya
+      const filePath = `avatars/${fileName}`;
 
-      // 2. Upload ke bucket Supabase (Sesuaikan 'images' dengan nama bucket-mu)
       const { error: uploadError } = await supabase.storage
-        .from("avatars") // GANTI 'images' kalau nama bucket-mu beda
+        .from("avatars")
         .upload(filePath, file);
 
       if (uploadError) throw uploadError;
 
-      // 3. Dapatkan URL publik dari foto yang baru diupload
       const {
         data: { publicUrl },
-      } = supabase.storage
-        .from("avatars") // Sama, sesuaikan nama bucket
-        .getPublicUrl(filePath);
+      } = supabase.storage.from("avatars").getPublicUrl(filePath);
 
-      // 4. Simpan URL tersebut ke database Prisma
       const result = await updateAvatarAction(publicUrl);
 
       if (result.success) {
-        setAvatarUrl(publicUrl); // Update tampilan foto di layar
+        setAvatarUrl(publicUrl);
         toast.success(result.message, { id: "avatar" });
       } else {
         toast.error(result.message, { id: "avatar" });
@@ -87,104 +71,70 @@ export default function SettingsView({
       toast.error("Gagal mengunggah foto.", { id: "avatar" });
     } finally {
       setIsUploadingAvatar(false);
-      // Reset input file biar bisa pilih foto yang sama lagi kalau error
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
-  // FUNGSI 1: Simpan Profil
   const handleSaveProfile = async () => {
     setIsSavingProfile(true);
     toast.loading("Menyimpan profil...", { id: "profile" });
-
     const result = await updateProfileAction(fullName, bio);
-
-    if (result.success) {
-      toast.success(result.message, { id: "profile" });
-    } else {
-      toast.error(result.message, { id: "profile" });
-    }
+    if (result.success) toast.success(result.message, { id: "profile" });
+    else toast.error(result.message, { id: "profile" });
     setIsSavingProfile(false);
   };
 
-  // FUNGSI 2: Update Password
   const handleUpdatePassword = async () => {
-    if (password !== confirmPassword) {
-      toast.error("Password tidak cocok!");
-      return;
-    }
-    if (password.length < 6) {
-      toast.error("Password minimal 6 karakter!");
-      return;
-    }
+    if (password !== confirmPassword)
+      return toast.error("Password tidak cocok!");
+    if (password.length < 6) return toast.error("Password minimal 6 karakter!");
 
     setIsUpdatingPassword(true);
     toast.loading("Memperbarui password...", { id: "password" });
-
     const result = await updatePasswordAction(password);
-
     if (result.success) {
       toast.success(result.message, { id: "password" });
-      // Kosongkan kolom password setelah berhasil
       setPassword("");
       setConfirmPassword("");
-    } else {
-      toast.error(result.message, { id: "password" });
-    }
+    } else toast.error(result.message, { id: "password" });
     setIsUpdatingPassword(false);
   };
 
   return (
     <div className="max-w-4xl space-y-8 pb-12">
       <div>
-        <h1
-          className={`text-3xl font-bold transition-colors ${isDarkMode ? "text-foreground" : "text-zinc-900"}`}
-        >
+        <h1 className="text-3xl font-bold text-zinc-900 dark:text-white transition-colors">
           Settings
         </h1>
-        <p
-          className={`mt-2 transition-colors ${isDarkMode ? "text-muted-foreground" : "text-zinc-600"}`}
-        >
+        <p className="mt-2 text-zinc-600 dark:text-zinc-400 transition-colors">
           Manage your account and preferences
         </p>
       </div>
 
       {/* Profile Section */}
-      <div
-        className={`rounded-2xl p-8 border transition-colors ${isDarkMode ? "bg-card border-border" : "bg-white border-zinc-200 shadow-sm"}`}
-      >
-        <h2
-          className={`text-xl font-semibold mb-6 transition-colors ${isDarkMode ? "text-foreground" : "text-zinc-900"}`}
-        >
+      <div className="rounded-2xl p-8 border transition-colors bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 shadow-sm">
+        <h2 className="text-xl font-semibold mb-6 text-zinc-900 dark:text-white transition-colors">
           Profile Information
         </h2>
 
         <div className="space-y-8">
           {/* Avatar */}
-          {/* Avatar */}
           <div className="flex items-end gap-4 mb-2">
-            {/* Tampilan Foto atau Placeholder */}
-            <div className="relative w-16 h-16 rounded-full overflow-hidden border border-zinc-200 bg-zinc-100 shrink-0">
+            <div className="relative w-16 h-16 rounded-full overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-800 shrink-0">
               {avatarUrl ? (
                 <Image
                   src={avatarUrl}
                   alt="Avatar"
-                  fill // Ini butuh parent yang punya 'relative' dan ukuran (w-16 h-16)
+                  fill
                   sizes="64px"
                   className="object-cover"
                   unoptimized
-                  // Debugging: Muncul di console browser kalau berhasil
-                  onLoadingComplete={() =>
-                    console.log("Gambar Settings Muncul!")
-                  }
                 />
               ) : (
-                /* Pastikan pakai h-full w-full di sini supaya gradient-nya gak gepeng */
-                <div className="h-full w-full bg-linear-to-br from-emerald-400 to-blue-500" />
+                <div className="h-full w-full bg-gradient-to-br from-emerald-400 to-blue-500" />
               )}
             </div>
 
-            {/* Input File Tersembunyi */}
             <input
               type="file"
               accept="image/*"
@@ -193,16 +143,12 @@ export default function SettingsView({
               onChange={handleAvatarUpload}
             />
 
-            {/* Tombol Pemantik */}
             <button
-              type="button" // Biasakan kasih type button biar gak trigger submit form
+              type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={isUploadingAvatar}
-              className={`px-4 py-2 rounded-lg border font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                isDarkMode
-                  ? "border-border text-foreground hover:bg-muted"
-                  : "border-zinc-300 text-zinc-900 hover:bg-zinc-100"
-              }`}
+              className="px-4 py-2 rounded-lg border font-medium text-sm transition-colors disabled:opacity-50 
+                       border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800"
             >
               {isUploadingAvatar ? "Uploading..." : "Change Avatar"}
             </button>
@@ -211,43 +157,40 @@ export default function SettingsView({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Name */}
             <div>
-              <label
-                className={`block text-sm font-medium mb-2 transition-colors ${isDarkMode ? "text-foreground" : "text-zinc-900"}`}
-              >
+              <label className="block text-sm font-medium mb-2 text-zinc-900 dark:text-zinc-200">
                 Full Name
               </label>
               <input
                 type="text"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className={`w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 transition-colors ${isDarkMode ? "bg-input border-border text-foreground focus:ring-accent/50" : "bg-white border-zinc-300 text-zinc-900 focus:ring-emerald-500/50"}`}
+                className="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 transition-all
+                         bg-white dark:bg-zinc-950 border-zinc-300 dark:border-zinc-800 
+                         text-zinc-900 dark:text-white focus:ring-emerald-500/50"
               />
             </div>
 
-            {/* Email (KITA KUNCI / READ-ONLY) */}
+            {/* Email (Read Only) */}
             <div>
-              <label
-                className={`block text-sm font-medium mb-2 transition-colors ${isDarkMode ? "text-foreground" : "text-zinc-900"}`}
-              >
+              <label className="block text-sm font-medium mb-2 text-zinc-900 dark:text-zinc-200">
                 Email{" "}
                 <span className="text-xs text-zinc-500 font-normal">
-                  (Cannot be changed)
+                  (Read only)
                 </span>
               </label>
               <input
                 type="email"
                 value={email}
                 disabled
-                className={`w-full px-4 py-3 rounded-lg border transition-colors opacity-70 cursor-not-allowed ${isDarkMode ? "bg-zinc-900 border-border text-zinc-400" : "bg-zinc-100 border-zinc-300 text-zinc-500"}`}
+                className="w-full px-4 py-3 rounded-lg border transition-colors opacity-70 cursor-not-allowed
+                         bg-zinc-100 dark:bg-zinc-900 border-zinc-300 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400"
               />
             </div>
           </div>
 
           {/* Bio */}
           <div>
-            <label
-              className={`block text-sm font-medium mb-2 transition-colors ${isDarkMode ? "text-foreground" : "text-zinc-900"}`}
-            >
+            <label className="block text-sm font-medium mb-2 text-zinc-900 dark:text-zinc-200">
               Bio
             </label>
             <textarea
@@ -255,16 +198,19 @@ export default function SettingsView({
               rows={4}
               value={bio}
               onChange={(e) => setBio(e.target.value)}
-              className={`w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 transition-colors ${isDarkMode ? "bg-input border-border text-foreground placeholder-muted-foreground focus:ring-accent/50" : "bg-white border-zinc-300 text-zinc-900 placeholder-zinc-500 focus:ring-emerald-500/50"}`}
+              className="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 transition-all
+                       bg-white dark:bg-zinc-950 border-zinc-300 dark:border-zinc-800 
+                       text-zinc-900 dark:text-white placeholder-zinc-500 focus:ring-emerald-500/50"
             />
           </div>
 
-          {/* Save Button Profile */}
+          {/* Save Button */}
           <div className="pt-2">
             <button
               onClick={handleSaveProfile}
               disabled={isSavingProfile || !fullName}
-              className={`px-6 py-3 rounded-lg font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed ${isDarkMode ? "bg-white text-zinc-900 hover:bg-zinc-200" : "bg-zinc-900 text-white hover:bg-zinc-800"}`}
+              className="px-6 py-3 rounded-lg font-medium transition-all disabled:opacity-50
+                       bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200"
             >
               {isSavingProfile ? "Saving..." : "Save Changes"}
             </button>
@@ -273,22 +219,15 @@ export default function SettingsView({
       </div>
 
       {/* Security Section */}
-      <div
-        className={`rounded-2xl p-8 border transition-colors ${isDarkMode ? "bg-card border-border" : "bg-white border-zinc-200 shadow-sm"}`}
-      >
-        <h2
-          className={`text-xl font-semibold mb-6 transition-colors ${isDarkMode ? "text-foreground" : "text-zinc-900"}`}
-        >
+      <div className="rounded-2xl p-8 border transition-colors bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 shadow-sm">
+        <h2 className="text-xl font-semibold mb-6 text-zinc-900 dark:text-white transition-colors">
           Security
         </h2>
 
         <div className="space-y-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Password */}
             <div>
-              <label
-                className={`block text-sm font-medium mb-2 transition-colors ${isDarkMode ? "text-foreground" : "text-zinc-900"}`}
-              >
+              <label className="block text-sm font-medium mb-2 text-zinc-900 dark:text-zinc-200">
                 New Password
               </label>
               <input
@@ -296,15 +235,14 @@ export default function SettingsView({
                 placeholder="Enter new password..."
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className={`w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 transition-colors ${isDarkMode ? "bg-input border-border text-foreground placeholder-muted-foreground focus:ring-accent/50" : "bg-white border-zinc-300 text-zinc-900 placeholder-zinc-500 focus:ring-emerald-500/50"}`}
+                className="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 transition-all
+                         bg-white dark:bg-zinc-950 border-zinc-300 dark:border-zinc-800 
+                         text-zinc-900 dark:text-white focus:ring-emerald-500/50"
               />
             </div>
 
-            {/* Confirm Password */}
             <div>
-              <label
-                className={`block text-sm font-medium mb-2 transition-colors ${isDarkMode ? "text-foreground" : "text-zinc-900"}`}
-              >
+              <label className="block text-sm font-medium mb-2 text-zinc-900 dark:text-zinc-200">
                 Confirm Password
               </label>
               <input
@@ -312,17 +250,19 @@ export default function SettingsView({
                 placeholder="Confirm new password..."
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className={`w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 transition-colors ${isDarkMode ? "bg-input border-border text-foreground placeholder-muted-foreground focus:ring-accent/50" : "bg-white border-zinc-300 text-zinc-900 placeholder-zinc-500 focus:ring-emerald-500/50"}`}
+                className="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 transition-all
+                         bg-white dark:bg-zinc-950 border-zinc-300 dark:border-zinc-800 
+                         text-zinc-900 dark:text-white focus:ring-emerald-500/50"
               />
             </div>
           </div>
 
-          {/* Update Button Password */}
           <div className="pt-2">
             <button
               onClick={handleUpdatePassword}
               disabled={isUpdatingPassword || !password || !confirmPassword}
-              className={`px-6 py-3 rounded-lg font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed ${isDarkMode ? "bg-white text-zinc-900 hover:bg-zinc-200" : "bg-zinc-900 text-white hover:bg-zinc-800"}`}
+              className="px-6 py-3 rounded-lg font-medium transition-all disabled:opacity-50
+                       bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200"
             >
               {isUpdatingPassword ? "Updating..." : "Update Password"}
             </button>

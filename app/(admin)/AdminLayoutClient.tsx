@@ -15,19 +15,21 @@ export default function AdminLayoutClient({
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   return (
-    <div
-      className={`flex min-h-screen transition-colors ${isDarkMode ? "bg-zinc-950" : "bg-zinc-50"}`}
-    >
-      {/* 3. Kirim profil ke Sidebar */}
-      <Sidebar isDarkMode={isDarkMode} userProfile={userProfile} />
-
-      <main className="flex-1 min-w-0 overflow-hidden md:ml-64 flex flex-col min-h-screen pb-14 md:pb-0">
-        <Header
-          isDarkMode={isDarkMode}
-          onThemeToggle={() => setIsDarkMode(!isDarkMode)}
-        />
-        <div className="flex-1 overflow-y-auto">{children}</div>
-      </main>
+    // KUNCI: Tambahkan class "dark" di sini jika isDarkMode true
+    <div className={`${isDarkMode ? "dark" : ""} min-h-screen`}>
+      <div className="flex min-h-screen bg-zinc-50 dark:bg-zinc-950 transition-colors">
+        <Sidebar userProfile={userProfile} />{" "}
+        {/* Gak perlu kirim isDarkMode lagi */}
+        <main className="flex-1 md:ml-64 flex flex-col min-w-0 overflow-hidden">
+          <Header
+            onThemeToggle={() => setIsDarkMode(!isDarkMode)}
+            isDarkMode={isDarkMode}
+          />
+          <div className="flex-1 p-4 md:p-8">
+            {children} {/* Dashboard sekarang ada di dalam lingkungan "dark" */}
+          </div>
+        </main>
+      </div>
     </div>
   );
 }
