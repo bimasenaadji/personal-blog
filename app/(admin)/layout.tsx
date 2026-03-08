@@ -1,6 +1,3 @@
-// FILE: app/(admin)/layout.tsx
-// JANGAN kasih "use client" di sini!
-
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/db/client";
 import AdminLayoutClient from "./AdminLayoutClient"; // Copy paste kode AdminLayout lo ke file ini
