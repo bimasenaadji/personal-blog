@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useEffect } from "react";
+import { useState, useTransition, useEffect, useRef } from "react";
 import {
   Bold,
   Italic,
@@ -11,12 +11,14 @@ import {
   Image as ImageIcon,
   Type,
   Settings as SettingsIcon,
+  Loader2,
 } from "lucide-react";
 import { createPostAction, updatePostAction } from "@/actions/post.action";
 import Link from "next/link";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 interface CreateNewViewProps {
   existingCategories: string[];
@@ -39,6 +41,11 @@ export default function CreateNewView({
   const [activeTab, setActiveTab] = useState<"write" | "settings">("write");
   const [showCategories, setShowCategories] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const [loadingType, setLoadingType] = useState<"Draft" | "Published" | null>(
+    null,
+  );
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const router = useRouter();
 
   useEffect(() => {
     if (title && !initialData) {
@@ -49,6 +56,16 @@ export default function CreateNewView({
       setSlug(generatedSlug);
     }
   }, [title, initialData]);
+
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      // 1. Reset tinggi ke auto dulu supaya kalau kita hapus teks, tingginya bisa balik menyusut
+      textarea.style.height = "auto";
+      // 2. Set tinggi sesuai dengan scrollHeight (tinggi konten asli di dalamnya)
+      textarea.style.height = `${textarea.scrollHeight}px`;
+    }
+  }, [title]); // Jalan setiap kali title di-update
 
   const editor = useEditor({
     extensions: [StarterKit],
@@ -68,6 +85,10 @@ export default function CreateNewView({
     if (!content || content === "<p></p>") return toast.error("Konten kosong!");
     if (!category) return toast.error("Pilih kategori!");
 
+    // --- MULAI SIHIR UX ---
+    setLoadingType(clickedStatus); // Set siapa yang lagi kerja
+    const toastId = toast.loading("Processing...");
+
     startTransition(async () => {
       const formData = new FormData();
       formData.append("title", title);
@@ -84,8 +105,17 @@ export default function CreateNewView({
         ? await updatePostAction(initialData.id, formData)
         : await createPostAction(formData);
 
-      if (response?.error) toast.error(response.error);
-      else toast.success(initialData?.id ? "Updated!" : "Saved!");
+      if (response?.error)
+        toast.error(response.error, { id: toastId }); // Ganti loading jadi error
+      else
+        toast.success(
+          initialData?.id ? "Berhasil diupdate!" : "Post berhasil dibuat!",
+          { id: toastId },
+        );
+      setTimeout(() => {
+        router.push("/posts");
+      }, 500);
+      setLoadingType(null);
     });
   };
 
@@ -121,14 +151,16 @@ export default function CreateNewView({
             disabled={isPending}
             className="px-4 py-2 text-xs font-bold rounded-full bg-zinc-200 dark:bg-zinc-800 hover:opacity-80 transition-opacity uppercase tracking-wider text-zinc-900 dark:text-zinc-100"
           >
-            Save Draft
+            {isPending && loadingType === "Draft" ? "Saving..." : "Save Draft"}
           </button>
           <button
             onClick={() => handleSubmit("Published")}
             disabled={isPending}
             className="px-5 py-2 text-xs font-bold rounded-full bg-zinc-900 dark:bg-zinc-200 text-white dark:text-black hover:opacity-80 transition-opacity uppercase tracking-wider"
           >
-            Publish
+            {isPending && loadingType === "Published"
+              ? "Publishing..."
+              : "Publish"}
           </button>
         </div>
       </header>
@@ -156,6 +188,7 @@ export default function CreateNewView({
         >
           <div className="max-w-4xl mx-auto py-8 lg:py-12 px-6 lg:px-10">
             <textarea
+              ref={textareaRef}
               placeholder="Post Title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}

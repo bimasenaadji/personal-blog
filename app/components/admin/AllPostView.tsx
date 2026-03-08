@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { Edit2, Trash2, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
+import toast from "react-hot-toast";
 import { deletePostAction } from "@/actions/post.action";
 
 interface Post {
@@ -29,14 +30,77 @@ export default function AllPostsView({ initialPosts }: AllPostsViewProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [isPending, startTransition] = useTransition();
 
-  const handleDelete = (id: string) => {
-    if (
-      window.confirm("Yakin nih mau menghapus artikel ini secara permanen?")
-    ) {
-      startTransition(async () => {
-        await deletePostAction(id);
-      });
-    }
+  const executeDelete = (id: string) => {
+    const toastId = toast.loading("Menghapus artikel...");
+
+    startTransition(async () => {
+      try {
+        const response = await deletePostAction(id);
+
+        if (response?.error) {
+          toast.error(response.error, { id: toastId });
+        } else {
+          toast.success("Artikel berhasil dihapus!", { id: toastId });
+          // Jika perlu redirect atau refresh:
+          // router.refresh();
+        }
+      } catch (error) {
+        toast.error("Gagal menghapus artikel.", { id: toastId });
+      }
+    });
+  };
+
+  const handleDelete = (id: string, title: string) => {
+    toast.custom(
+      (t) => (
+        // KUNCI 1: t.visible buat animasi masuk/keluar yang mulus
+        <div
+          className={`${
+            t.visible ? "animate-enter" : "animate-leave"
+          } max-w-md w-full bg-white dark:bg-zinc-950 shadow-2xl rounded-2xl pointer-events-auto flex flex-col border border-zinc-200 dark:border-zinc-800`}
+        >
+          {/* Konten Dalam */}
+          <div className="p-6 flex flex-col gap-4">
+            {/* Bagian Teks */}
+            <div>
+              <h3 className="text-lg font-black text-zinc-900 dark:text-white">
+                Hapus Artikel?
+              </h3>
+              <p className="text-sm text-zinc-500 mt-2 leading-relaxed">
+                Kamu akan menghapus{" "}
+                <span className="font-bold text-zinc-900 dark:text-zinc-200">
+                  "{title}"
+                </span>{" "}
+                secara permanen. Data yang hilang tidak bisa dikembalikan.
+              </p>
+            </div>
+
+            {/* Bagian Tombol */}
+            <div className="flex justify-end gap-2 mt-4">
+              <button
+                onClick={() => toast.dismiss(t.id)}
+                className="px-4 py-2.5 text-sm font-bold text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl transition-colors"
+              >
+                Batal
+              </button>
+              <button
+                onClick={() => {
+                  toast.dismiss(t.id);
+                  executeDelete(id); // Panggil fungsi hapusmu di sini
+                }}
+                className="px-5 py-2.5 bg-red-600 text-white text-sm font-bold rounded-xl hover:bg-red-700 transition-colors shadow-md shadow-red-600/20"
+              >
+                Ya, Hapus
+              </button>
+            </div>
+          </div>
+        </div>
+      ),
+      {
+        duration: Infinity, // Biar gak hilang sebelum dipilih
+        position: "top-center",
+      },
+    );
   };
 
   const filteredPosts = initialPosts.filter((post) => {
@@ -198,7 +262,7 @@ export default function AllPostsView({ initialPosts }: AllPostsViewProps) {
                         <Edit2 size={16} />
                       </Link>
                       <button
-                        onClick={() => handleDelete(post.id)}
+                        onClick={() => handleDelete(post.id, post.title)}
                         disabled={isPending}
                         className="p-2 rounded-lg text-zinc-600 dark:text-zinc-400 hover:bg-red-100 dark:hover:bg-red-500/10 hover:text-red-600 dark:hover:text-red-400 transition-colors disabled:opacity-50"
                       >

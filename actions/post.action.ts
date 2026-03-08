@@ -95,7 +95,7 @@ export async function createPostAction(formData: FormData) {
   // Bersihkan cache agar Dashboard & All Posts langsung update
   revalidatePath("/posts");
   revalidatePath("/dashboard");
-  redirect("/posts");
+  // redirect("/posts"); // Redirect ke halaman list post setelah berhasil membuat
 }
 
 // Pastikan parameter keduanya tipe datanya adalah FormData
@@ -157,5 +157,5 @@ export async function updatePostAction(id: string, formData: FormData) {
   // 5. Bersihkan Cache dan Redirect
   revalidatePath("/posts");
   revalidatePath("/editor");
-  redirect("/posts");
+  // redirect("/posts");
 }
