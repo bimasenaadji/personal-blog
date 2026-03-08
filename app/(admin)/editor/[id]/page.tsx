@@ -24,11 +24,7 @@ export default async function EditPostPage({
   return (
     <div className="h-full">
       {/* 4. Daur ulang komponen CreateNewView, tapi kasih initialData! */}
-      <CreateNewView
-        isDarkMode={false}
-        existingCategories={categories}
-        initialData={postData}
-      />
+      <CreateNewView existingCategories={categories} initialData={postData} />
     </div>
   );
 }
