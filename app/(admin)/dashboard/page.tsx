@@ -51,11 +51,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="h-full px-6 py-8 lg:px-12">
-      <DashboardView
-        isDarkMode={false} // Nanti sesuaikan dengan state dark mode globalmu
-        stats={stats}
-        recentPosts={recentPosts}
-      />
+      <DashboardView stats={stats} recentPosts={recentPosts} />
     </div>
   );
 }

@@ -33,7 +33,7 @@ export default async function PostsPage() {
   return (
     <div className="p-8 max-w-7xl mx-auto">
       {/* 4. Lempar datanya ke UI yang sudah kamu buat */}
-      <AllPostsView isDarkMode={false} initialPosts={allPosts} />
+      <AllPostsView initialPosts={allPosts} />
     </div>
   );
 }

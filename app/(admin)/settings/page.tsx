@@ -39,7 +39,7 @@ export default async function SettingsPage() {
 
   return (
     <div className="h-full px-6 py-8 lg:px-12">
-      <SettingsView isDarkMode={false} userProfile={userProfile} />
+      <SettingsView userProfile={userProfile} />
     </div>
   );
 }

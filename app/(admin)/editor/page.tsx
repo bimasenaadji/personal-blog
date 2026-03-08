@@ -10,7 +10,7 @@ export default async function CreatePostPage() {
 
   return (
     <div className="h-full">
-      <CreateNewView isDarkMode={false} existingCategories={categories} />
+      <CreateNewView existingCategories={categories} />
     </div>
   );
 }
