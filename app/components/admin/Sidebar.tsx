@@ -140,29 +140,6 @@ export default function Sidebar({ userProfile }: SidebarProps) {
             </Link>
           );
         })}
-        {/* Profile Avatar Mobile */}
-        <Link
-          href="/settings"
-          className={`flex flex-col items-center justify-center flex-1 h-full ${pathname === "/settings" ? "text-zinc-900 dark:text-white" : "text-zinc-400 dark:text-zinc-500"}`}
-        >
-          <div
-            className={`w-6 h-6 rounded-full overflow-hidden border ${pathname === "/settings" ? "border-zinc-900 dark:border-white" : "border-transparent"}`}
-          >
-            {userProfile?.avatar ? (
-              <Image
-                src={userProfile.avatar}
-                alt="Profile"
-                width={24}
-                height={24}
-                className="object-cover"
-                unoptimized
-              />
-            ) : (
-              <div className="w-full h-full bg-gradient-to-br from-emerald-400 to-blue-500" />
-            )}
-          </div>
-          <span className="text-[10px] font-medium">Profile</span>
-        </Link>
       </nav>
     </>
   );
