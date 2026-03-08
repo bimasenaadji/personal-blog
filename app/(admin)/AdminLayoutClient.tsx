@@ -21,7 +21,7 @@ export default function AdminLayoutClient({
       {/* 3. Kirim profil ke Sidebar */}
       <Sidebar isDarkMode={isDarkMode} userProfile={userProfile} />
 
-      <main className="flex-1 min-w-0 overflow-hidden md:ml-64 flex flex-col min-h-screen pb-14">
+      <main className="flex-1 min-w-0 overflow-hidden md:ml-64 flex flex-col min-h-screen pb-14 md:pb-0">
         <Header
           isDarkMode={isDarkMode}
           onThemeToggle={() => setIsDarkMode(!isDarkMode)}
