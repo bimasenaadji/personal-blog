@@ -15,7 +15,6 @@ import { signOutAction } from "@/actions/auth.action";
 import Image from "next/image";
 
 interface SidebarProps {
-  isDarkMode: boolean;
   userProfile: {
     name: string | null;
     avatar: string | null;
@@ -23,13 +22,13 @@ interface SidebarProps {
   } | null;
 }
 
-export default function Sidebar({ isDarkMode, userProfile }: SidebarProps) {
+export default function Sidebar({ userProfile }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const navItems = [
-    { href: "/dashboard", label: "Home", icon: LayoutDashboard }, // Label dipendekkan untuk mobile
+    { href: "/dashboard", label: "Home", icon: LayoutDashboard },
     { href: "/posts", label: "Posts", icon: FileText },
     { href: "/editor", label: "Write", icon: PenTool },
     { href: "/settings", label: "Settings", icon: Settings },
@@ -45,21 +44,14 @@ export default function Sidebar({ isDarkMode, userProfile }: SidebarProps) {
 
   return (
     <>
-      {/* --- 1. DESKTOP SIDEBAR (Tampil hanya di md: ke atas) --- */}
+      {/* --- 1. DESKTOP SIDEBAR --- */}
       <aside
-        className={`hidden md:flex w-64 h-screen flex-col fixed left-0 top-0 transition-colors border-r z-50 ${
-          isDarkMode
-            ? "bg-zinc-950 border-zinc-800"
-            : "bg-white border-zinc-200"
-        }`}
+        className="hidden md:flex w-64 h-screen flex-col fixed left-0 top-0 transition-colors border-r z-50 
+                   bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800"
       >
         {/* Logo */}
-        <div
-          className={`p-6 border-b transition-colors ${isDarkMode ? "border-zinc-800" : "border-zinc-200"}`}
-        >
-          <h1
-            className={`text-2xl font-bold tracking-tight ${isDarkMode ? "text-white" : "text-zinc-900"}`}
-          >
+        <div className="p-6 border-b transition-colors border-zinc-200 dark:border-zinc-800">
+          <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-white">
             Console
           </h1>
         </div>
@@ -75,12 +67,8 @@ export default function Sidebar({ isDarkMode, userProfile }: SidebarProps) {
                 href={item.href}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all ${
                   isActive
-                    ? isDarkMode
-                      ? "bg-zinc-800 text-white"
-                      : "bg-zinc-900 text-white"
-                    : isDarkMode
-                      ? "text-zinc-400 hover:bg-zinc-800/50"
-                      : "text-zinc-600 hover:bg-zinc-100"
+                    ? "bg-zinc-900 dark:bg-zinc-800 text-white font-medium"
+                    : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/50"
                 }`}
               >
                 <Icon size={20} />
@@ -91,14 +79,12 @@ export default function Sidebar({ isDarkMode, userProfile }: SidebarProps) {
         </nav>
 
         {/* Profile & Logout Desktop */}
-        <div
-          className={`p-4 border-t ${isDarkMode ? "border-zinc-800" : "border-zinc-200"} space-y-3`}
-        >
+        <div className="p-4 border-t transition-colors border-zinc-200 dark:border-zinc-800 space-y-3">
           <Link
             href="/settings"
-            className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all ${isDarkMode ? "hover:bg-zinc-800/50" : "hover:bg-zinc-100"}`}
+            className="flex items-center gap-3 px-4 py-3 rounded-2xl transition-all hover:bg-zinc-100 dark:hover:bg-zinc-800/50"
           >
-            <div className="relative w-10 h-10 rounded-full overflow-hidden shrink-0">
+            <div className="relative w-10 h-10 rounded-full overflow-hidden shrink-0 border border-zinc-200 dark:border-zinc-800">
               {userProfile?.avatar ? (
                 <Image
                   src={userProfile.avatar}
@@ -112,14 +98,10 @@ export default function Sidebar({ isDarkMode, userProfile }: SidebarProps) {
               )}
             </div>
             <div className="min-w-0">
-              <p
-                className={`text-sm font-medium truncate ${isDarkMode ? "text-white" : "text-zinc-900"}`}
-              >
+              <p className="text-sm font-medium truncate text-zinc-900 dark:text-white">
                 {userProfile?.name || "Admin"}
               </p>
-              <p
-                className={`text-xs truncate ${isDarkMode ? "text-zinc-400" : "text-zinc-600"}`}
-              >
+              <p className="text-xs truncate text-zinc-600 dark:text-zinc-400">
                 {userProfile?.email}
               </p>
             </div>
@@ -127,21 +109,18 @@ export default function Sidebar({ isDarkMode, userProfile }: SidebarProps) {
           <button
             onClick={handleLogout}
             disabled={isLoggingOut}
-            className="w-full flex items-center gap-3 px-4 py-2 text-red-500 text-sm hover:opacity-80"
+            className="w-full flex items-center gap-3 px-4 py-2 text-red-600 dark:text-red-400 text-sm hover:opacity-80 disabled:opacity-50"
           >
             <LogOut size={18} />
-            <span>Logout</span>
+            <span>{isLoggingOut ? "Exiting..." : "Logout"}</span>
           </button>
         </div>
       </aside>
 
-      {/* --- 2. MOBILE BOTTOM BAR (Tampil hanya di bawah md) --- */}
+      {/* --- 2. MOBILE BOTTOM BAR --- */}
       <nav
-        className={`md:hidden fixed bottom-0 left-0 right-0 h-16 border-t z-50 flex items-center justify-around px-2 transition-colors ${
-          isDarkMode
-            ? "bg-zinc-950 border-zinc-800"
-            : "bg-white border-zinc-200"
-        }`}
+        className="md:hidden fixed bottom-0 left-0 right-0 h-16 border-t z-50 flex items-center justify-around px-2 transition-colors 
+                   bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800"
       >
         {navItems.map((item) => {
           const Icon = item.icon;
@@ -152,12 +131,8 @@ export default function Sidebar({ isDarkMode, userProfile }: SidebarProps) {
               href={item.href}
               className={`flex flex-col items-center justify-center gap-1 flex-1 h-full transition-all ${
                 isActive
-                  ? isDarkMode
-                    ? "text-white"
-                    : "text-zinc-900"
-                  : isDarkMode
-                    ? "text-zinc-500"
-                    : "text-zinc-400"
+                  ? "text-zinc-900 dark:text-white"
+                  : "text-zinc-400 dark:text-zinc-500"
               }`}
             >
               <Icon size={20} className={isActive ? "scale-110" : ""} />
@@ -165,6 +140,29 @@ export default function Sidebar({ isDarkMode, userProfile }: SidebarProps) {
             </Link>
           );
         })}
+        {/* Profile Avatar Mobile */}
+        <Link
+          href="/settings"
+          className={`flex flex-col items-center justify-center flex-1 h-full ${pathname === "/settings" ? "text-zinc-900 dark:text-white" : "text-zinc-400 dark:text-zinc-500"}`}
+        >
+          <div
+            className={`w-6 h-6 rounded-full overflow-hidden border ${pathname === "/settings" ? "border-zinc-900 dark:border-white" : "border-transparent"}`}
+          >
+            {userProfile?.avatar ? (
+              <Image
+                src={userProfile.avatar}
+                alt="Profile"
+                width={24}
+                height={24}
+                className="object-cover"
+                unoptimized
+              />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-emerald-400 to-blue-500" />
+            )}
+          </div>
+          <span className="text-[10px] font-medium">Profile</span>
+        </Link>
       </nav>
     </>
   );

@@ -14,30 +14,22 @@ interface Post {
   views: number;
 }
 
-// 1. Tambahkan props initialPosts
 interface AllPostsViewProps {
-  isDarkMode: boolean;
   initialPosts: Post[];
 }
 
 const ITEMS_PER_PAGE = 5;
 
-// 2. Terima initialPosts dari Page
-export default function AllPostsView({
-  isDarkMode,
-  initialPosts,
-}: AllPostsViewProps) {
+export default function AllPostsView({ initialPosts }: AllPostsViewProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<
     "All" | "Published" | "Draft"
   >("All");
   const [categoryFilter, setCategoryFilter] = useState<string>("All");
   const [currentPage, setCurrentPage] = useState(1);
-
   const [isPending, startTransition] = useTransition();
 
   const handleDelete = (id: string) => {
-    // Kasih pop-up konfirmasi standar bawaan browser
     if (
       window.confirm("Yakin nih mau menghapus artikel ini secara permanen?")
     ) {
@@ -47,7 +39,6 @@ export default function AllPostsView({
     }
   };
 
-  // 3. Ganti ALL_POSTS menjadi initialPosts
   const filteredPosts = initialPosts.filter((post) => {
     const matchesSearch = post.title
       .toLowerCase()
@@ -66,7 +57,6 @@ export default function AllPostsView({
     startIdx + ITEMS_PER_PAGE,
   );
 
-  // 4. Ganti ALL_POSTS menjadi initialPosts
   const categories = ["All", ...new Set(initialPosts.map((p) => p.category))];
 
   const handlePreviousPage = () =>
@@ -78,14 +68,10 @@ export default function AllPostsView({
     <div className="space-y-8">
       {/* Header Halaman */}
       <div>
-        <h1
-          className={`text-3xl font-bold transition-colors ${isDarkMode ? "text-foreground" : "text-zinc-900"}`}
-        >
+        <h1 className="text-3xl font-bold text-zinc-900 dark:text-white transition-colors">
           All Posts
         </h1>
-        <p
-          className={`text-muted-foreground mt-2 transition-colors ${isDarkMode ? "text-muted-foreground" : "text-zinc-600"}`}
-        >
+        <p className="mt-2 text-zinc-600 dark:text-zinc-400 transition-colors">
           Manage all your blog posts
         </p>
       </div>
@@ -95,7 +81,7 @@ export default function AllPostsView({
         {/* Search */}
         <div className="relative w-full lg:max-w-xs">
           <Search
-            className={`absolute left-3 top-1/2 -translate-y-1/2 transition-colors ${isDarkMode ? "text-muted-foreground" : "text-zinc-500"}`}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 dark:text-zinc-400"
             size={18}
           />
           <input
@@ -106,11 +92,9 @@ export default function AllPostsView({
               setSearchTerm(e.target.value);
               setCurrentPage(1);
             }}
-            className={`w-full pl-10 pr-4 py-2 rounded-lg focus:outline-none focus:ring-2 transition-all ${
-              isDarkMode
-                ? "bg-zinc-900 border border-zinc-800 text-white placeholder-zinc-500 focus:ring-zinc-700"
-                : "bg-white border border-zinc-200 text-zinc-900 placeholder-zinc-500 focus:ring-emerald-500/50"
-            }`}
+            className="w-full pl-10 pr-4 py-2 rounded-lg focus:outline-none focus:ring-2 transition-all 
+                     bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 
+                     text-zinc-900 dark:text-white placeholder-zinc-500 focus:ring-emerald-500/50"
           />
         </div>
 
@@ -122,11 +106,9 @@ export default function AllPostsView({
               setStatusFilter(e.target.value as "All" | "Published" | "Draft");
               setCurrentPage(1);
             }}
-            className={`px-4 py-2 rounded-lg focus:outline-none focus:ring-2 transition-all cursor-pointer ${
-              isDarkMode
-                ? "bg-zinc-900 border border-zinc-800 text-white focus:ring-zinc-700"
-                : "bg-white border border-zinc-200 text-zinc-900 focus:ring-emerald-500/50"
-            }`}
+            className="px-4 py-2 rounded-lg focus:outline-none focus:ring-2 transition-all cursor-pointer 
+                     bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 
+                     text-zinc-900 dark:text-white focus:ring-emerald-500/50"
           >
             <option value="All">All Status</option>
             <option value="Published">Published</option>
@@ -139,11 +121,9 @@ export default function AllPostsView({
               setCategoryFilter(e.target.value);
               setCurrentPage(1);
             }}
-            className={`px-4 py-2 rounded-lg focus:outline-none focus:ring-2 transition-all cursor-pointer ${
-              isDarkMode
-                ? "bg-zinc-900 border border-zinc-800 text-white focus:ring-zinc-700"
-                : "bg-white border border-zinc-200 text-zinc-900 focus:ring-emerald-500/50"
-            }`}
+            className="px-4 py-2 rounded-lg focus:outline-none focus:ring-2 transition-all cursor-pointer 
+                     bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 
+                     text-zinc-900 dark:text-white focus:ring-emerald-500/50"
           >
             {categories.map((cat) => (
               <option key={cat} value={cat}>
@@ -154,16 +134,12 @@ export default function AllPostsView({
         </div>
       </div>
 
-      {/* Table */}
-      <div
-        className={`rounded-2xl overflow-hidden border transition-colors ${isDarkMode ? "bg-zinc-900 border-zinc-800" : "bg-white border-zinc-200"}`}
-      >
+      {/* Table Section */}
+      <div className="rounded-2xl border bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 transition-colors overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-200">
+          <table className="w-full min-w-[800px]">
             <thead>
-              <tr
-                className={`border-b transition-colors ${isDarkMode ? "border-zinc-800 bg-zinc-900/50" : "border-zinc-200 bg-zinc-50"}`}
-              >
+              <tr className="border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
                 <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-zinc-500">
                   Title
                 </th>
@@ -184,73 +160,47 @@ export default function AllPostsView({
                 </th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
               {paginatedPosts.map((post) => (
                 <tr
                   key={post.id}
-                  className={`border-b transition-colors ${isDarkMode ? "border-zinc-800/50 hover:bg-zinc-800/30" : "border-zinc-100 hover:bg-zinc-50"}`}
+                  className="hover:bg-zinc-50 dark:hover:bg-zinc-800/30 transition-colors"
                 >
-                  <td
-                    className={`px-6 py-4 text-sm font-medium transition-colors ${isDarkMode ? "text-zinc-200" : "text-zinc-900"}`}
-                  >
+                  <td className="px-6 py-4 text-sm font-medium text-zinc-900 dark:text-zinc-200">
                     {post.title}
                   </td>
                   <td className="px-6 py-4 text-sm">
                     <span
-                      className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                      className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
                         post.status === "Published"
-                          ? isDarkMode
-                            ? "bg-emerald-500/20 text-emerald-300"
-                            : "bg-emerald-100 text-emerald-700"
-                          : isDarkMode
-                            ? "bg-zinc-800 text-zinc-400"
-                            : "bg-zinc-200 text-zinc-700"
+                          ? "bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300"
+                          : "bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-400"
                       }`}
                     >
                       {post.status}
                     </span>
                   </td>
-                  <td
-                    className={`px-6 py-4 text-sm transition-colors ${isDarkMode ? "text-zinc-400" : "text-zinc-600"}`}
-                  >
+                  <td className="px-6 py-4 text-sm text-zinc-600 dark:text-zinc-400">
                     {post.category}
                   </td>
-                  <td
-                    className={`px-6 py-4 text-sm transition-colors ${isDarkMode ? "text-zinc-400" : "text-zinc-600"}`}
-                  >
+                  <td className="px-6 py-4 text-sm text-zinc-600 dark:text-zinc-400">
                     {post.date}
                   </td>
-                  <td
-                    className={`px-6 py-4 text-sm transition-colors ${isDarkMode ? "text-zinc-400" : "text-zinc-600"}`}
-                  >
+                  <td className="px-6 py-4 text-sm text-zinc-600 dark:text-zinc-400">
                     {post.views.toLocaleString()}
                   </td>
                   <td className="px-6 py-4 text-sm">
                     <div className="flex items-center gap-2">
-                      <button
-                        className={`p-2 rounded-lg transition-colors ${isDarkMode ? "hover:bg-zinc-800 text-zinc-400 hover:text-white" : "hover:bg-zinc-200 text-zinc-600 hover:text-zinc-900"}`}
+                      <Link
+                        href={`/editor/${post.id}`}
+                        className="p-2 rounded-lg text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-white transition-colors"
                       >
-                        {/* Tombol Edit (Ubah jadi Link) */}
-                        <Link
-                          href={`/editor/${post.id}`}
-                          className={`inline-block p-2 rounded-lg transition-colors ${
-                            isDarkMode
-                              ? "hover:bg-zinc-800 text-zinc-400 hover:text-white"
-                              : "hover:bg-zinc-200 text-zinc-600 hover:text-zinc-900"
-                          }`}
-                        >
-                          <Edit2 size={16} />
-                        </Link>
-                      </button>
-                      {/* Tombol Delete */}
+                        <Edit2 size={16} />
+                      </Link>
                       <button
                         onClick={() => handleDelete(post.id)}
                         disabled={isPending}
-                        className={`p-2 rounded-lg transition-colors ${
-                          isDarkMode
-                            ? "hover:bg-red-500/10 text-zinc-400 hover:text-red-400"
-                            : "hover:bg-red-100 text-zinc-600 hover:text-red-600"
-                        } ${isPending ? "opacity-50 cursor-not-allowed" : ""}`}
+                        className="p-2 rounded-lg text-zinc-600 dark:text-zinc-400 hover:bg-red-100 dark:hover:bg-red-500/10 hover:text-red-600 dark:hover:text-red-400 transition-colors disabled:opacity-50"
                       >
                         <Trash2 size={16} />
                       </button>
@@ -258,7 +208,6 @@ export default function AllPostsView({
                   </td>
                 </tr>
               ))}
-
               {paginatedPosts.length === 0 && (
                 <tr>
                   <td
@@ -274,36 +223,28 @@ export default function AllPostsView({
         </div>
 
         {/* Pagination */}
-        <div
-          className={`px-6 py-4 border-t flex items-center justify-between transition-colors ${isDarkMode ? "border-zinc-800" : "border-zinc-200"}`}
-        >
-          <p
-            className={`text-sm transition-colors ${isDarkMode ? "text-zinc-400" : "text-zinc-600"}`}
-          >
+        <div className="px-6 py-4 border-t border-zinc-200 dark:border-zinc-800 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between transition-colors">
+          <p className="text-sm text-zinc-600 dark:text-zinc-400">
             Showing {paginatedPosts.length > 0 ? startIdx + 1 : 0}–
             {Math.min(startIdx + ITEMS_PER_PAGE, filteredPosts.length)} of{" "}
             {filteredPosts.length} posts
           </p>
-          <div className="flex gap-2">
+          <div className="flex justify-center gap-2">
             <button
               onClick={handlePreviousPage}
               disabled={currentPage === 1}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                isDarkMode
-                  ? "border border-zinc-800 text-zinc-300 hover:bg-zinc-800"
-                  : "border border-zinc-200 text-zinc-900 hover:bg-zinc-100"
-              }`}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-all border
+                       border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-300
+                       hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-50"
             >
               <ChevronLeft size={16} /> Previous
             </button>
             <button
               onClick={handleNextPage}
               disabled={currentPage === totalPages || totalPages === 0}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                isDarkMode
-                  ? "border border-zinc-800 text-zinc-300 hover:bg-zinc-800"
-                  : "border border-zinc-200 text-zinc-900 hover:bg-zinc-100"
-              }`}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-all border
+                       border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-300
+                       hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-50"
             >
               Next <ChevronRight size={16} />
             </button>

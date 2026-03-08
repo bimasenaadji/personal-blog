@@ -19,13 +19,11 @@ import StarterKit from "@tiptap/starter-kit";
 import toast from "react-hot-toast";
 
 interface CreateNewViewProps {
-  isDarkMode: boolean;
   existingCategories: string[];
   initialData?: any;
 }
 
 export default function CreateNewView({
-  isDarkMode,
   existingCategories,
   initialData,
 }: CreateNewViewProps) {
@@ -59,7 +57,8 @@ export default function CreateNewView({
     onUpdate: ({ editor }) => setContent(editor.getHTML()),
     editorProps: {
       attributes: {
-        class: `prose prose-sm sm:prose-base lg:prose-lg focus:outline-none max-w-none min-h-[500px] ${isDarkMode ? "prose-invert" : ""}`,
+        // KUNCI: Gunakan prose-invert di dark mode agar teks otomatis putih
+        class: `prose prose-sm sm:prose-base lg:prose-lg focus:outline-none max-w-none min-h-[500px] dark:prose-invert`,
       },
     },
   });
@@ -99,14 +98,9 @@ export default function CreateNewView({
   };
 
   return (
-    // KUNCI: Gunakan 'relative' di desktop agar tidak menutupi Sidebar Dashboard
-    <div
-      className={`relative lg:static flex flex-col h-full transition-colors ${isDarkMode ? "bg-zinc-950 text-white" : "bg-zinc-50 text-zinc-900"}`}
-    >
-      {/* HEADER: Sticky agar tombol Save selalu ada */}
-      <header
-        className={`sticky top-0 z-40 px-4 py-4 flex items-center justify-between border-b backdrop-blur-md transition-colors ${isDarkMode ? "border-zinc-800 bg-zinc-950/80" : "border-zinc-200 bg-white/80"}`}
-      >
+    <div className="relative lg:static flex flex-col h-full transition-colors bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-white">
+      {/* HEADER */}
+      <header className="sticky top-0 z-40 px-4 py-4 flex items-center justify-between border-b backdrop-blur-md transition-colors border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-950/80">
         <div className="flex items-center gap-3">
           <Link
             href="/posts"
@@ -125,31 +119,31 @@ export default function CreateNewView({
           <button
             onClick={() => handleSubmit("Draft")}
             disabled={isPending}
-            className="px-4 py-2 text-xs font-bold rounded-full bg-zinc-200 dark:bg-zinc-800 hover:opacity-80 transition-opacity uppercase tracking-wider"
+            className="px-4 py-2 text-xs font-bold rounded-full bg-zinc-200 dark:bg-zinc-800 hover:opacity-80 transition-opacity uppercase tracking-wider text-zinc-900 dark:text-zinc-100"
           >
             Save Draft
           </button>
           <button
             onClick={() => handleSubmit("Published")}
             disabled={isPending}
-            className="px-5 py-2 text-xs font-bold rounded-full bg-zinc-900 dark:bg-emerald-600 text-white hover:opacity-80 transition-opacity uppercase tracking-wider"
+            className="px-5 py-2 text-xs font-bold rounded-full bg-zinc-900 dark:bg-zinc-200 text-black hover:opacity-80 transition-opacity uppercase tracking-wider"
           >
             Publish
           </button>
         </div>
       </header>
 
-      {/* MOBILE TAB SWITCHER: Hanya di layar kecil */}
-      <div className="lg:hidden flex border-b dark:border-zinc-800 bg-white dark:bg-zinc-950 sticky top-[65px] z-30">
+      {/* MOBILE TAB SWITCHER */}
+      <div className="lg:hidden flex border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 sticky top-[65px] z-30">
         <button
           onClick={() => setActiveTab("write")}
-          className={`flex-1 py-3 flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-widest border-b-2 transition-all ${activeTab === "write" ? "border-zinc-900 dark:border-white" : "border-transparent text-zinc-500"}`}
+          className={`flex-1 py-3 flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-widest border-b-2 transition-all ${activeTab === "write" ? "border-zinc-900 dark:border-white text-zinc-900 dark:text-white" : "border-transparent text-zinc-500"}`}
         >
           <Type size={16} /> Write
         </button>
         <button
           onClick={() => setActiveTab("settings")}
-          className={`flex-1 py-3 flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-widest border-b-2 transition-all ${activeTab === "settings" ? "border-zinc-900 dark:border-white" : "border-transparent text-zinc-500"}`}
+          className={`flex-1 py-3 flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-widest border-b-2 transition-all ${activeTab === "settings" ? "border-zinc-900 dark:border-white text-zinc-900 dark:text-white" : "border-transparent text-zinc-500"}`}
         >
           <SettingsIcon size={16} /> Settings
         </button>
@@ -165,14 +159,12 @@ export default function CreateNewView({
               placeholder="Post Title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full text-4xl lg:text-4xl font-black bg-transparent border-none outline-none mb-10 placeholder-zinc-200 dark:placeholder-zinc-900 resize-none h-auto"
+              className="w-full text-4xl lg:text-4xl font-black bg-transparent border-none outline-none mb-10 placeholder-zinc-200 dark:placeholder-zinc-900 resize-none h-auto text-zinc-900 dark:text-white"
               rows={1}
             />
 
-            {/* FLOATING TOOLBAR: Lebih modern */}
-            <div
-              className={`sticky top-[75px] lg:top-[85px] z-20 py-3 px-4 mb-8 rounded-2xl border shadow-sm flex gap-2 items-center overflow-x-auto no-scrollbar ${isDarkMode ? "bg-zinc-900 border-zinc-800" : "bg-white border-zinc-200"}`}
-            >
+            {/* FLOATING TOOLBAR */}
+            <div className="sticky top-[75px] lg:top-[85px] z-20 py-3 px-4 mb-8 rounded-2xl border shadow-sm flex gap-2 items-center overflow-x-auto no-scrollbar bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800">
               <button
                 onClick={() => editor?.chain().focus().toggleBold().run()}
                 className={`p-2 rounded-xl transition-colors ${editor?.isActive("bold") ? "bg-zinc-200 dark:bg-zinc-800 text-emerald-500" : "hover:bg-zinc-100 dark:hover:bg-zinc-800"}`}
@@ -188,13 +180,13 @@ export default function CreateNewView({
               <div className="w-px h-6 bg-zinc-200 dark:bg-zinc-800 mx-1" />
               <button
                 onClick={() => editor?.chain().focus().toggleCodeBlock().run()}
-                className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl"
+                className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl text-zinc-600 dark:text-zinc-400"
               >
                 <Code size={18} />
               </button>
               <button
                 onClick={() => editor?.chain().focus().toggleBlockquote().run()}
-                className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl"
+                className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl text-zinc-600 dark:text-zinc-400"
               >
                 <Quote size={18} />
               </button>
@@ -208,14 +200,14 @@ export default function CreateNewView({
 
         {/* SETTINGS SIDEBAR */}
         <aside
-          className={`w-full lg:w-[350px] lg:sticky lg:top-[80px] lg:h-[calc(100vh-80px)] p-6 lg:p-10 space-y-10 border-l dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-950/50 ${activeTab === "settings" ? "block" : "hidden lg:block"}`}
+          className={`w-full lg:w-[350px] lg:sticky lg:top-[80px] lg:h-[calc(100vh-80px)] p-6 lg:p-10 space-y-10 border-l border-zinc-200 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-950/50 ${activeTab === "settings" ? "block" : "hidden lg:block"}`}
         >
           <section>
             <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 mb-6">
               Cover Image
             </h3>
             {coverImage ? (
-              <div className="relative rounded-3xl overflow-hidden aspect-video border dark:border-zinc-800 shadow-xl group">
+              <div className="relative rounded-3xl overflow-hidden aspect-video border border-zinc-200 dark:border-zinc-800 shadow-xl group">
                 <img
                   src={coverImage}
                   className="w-full h-full object-cover transition-transform group-hover:scale-105"
@@ -237,7 +229,7 @@ export default function CreateNewView({
               <label className="flex flex-col items-center justify-center aspect-video border-2 border-dashed rounded-3xl cursor-pointer hover:bg-white dark:hover:bg-zinc-900 border-zinc-300 dark:border-zinc-800 transition-all group">
                 <ImageIcon
                   size={32}
-                  className="text-zinc-300 group-hover:text-slate-500 transition-colors mb-2"
+                  className="text-zinc-300 group-hover:text-zinc-500 transition-colors mb-2"
                 />
                 <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">
                   Add Cover
@@ -252,7 +244,7 @@ export default function CreateNewView({
             )}
           </section>
 
-          <section>
+          <section className="space-y-6">
             <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 mb-6">
               Metadata
             </h3>
@@ -265,16 +257,16 @@ export default function CreateNewView({
                   onChange={(e) => setCategory(e.target.value)}
                   onFocus={() => setShowCategories(true)}
                   onBlur={() => setTimeout(() => setShowCategories(false), 200)}
-                  className="w-full p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 outline-none focus:ring-2 focus:ring-emerald-500 transition-all text-sm"
+                  className="w-full p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 outline-none focus:ring-2 focus:ring-emerald-500 transition-all text-sm text-zinc-900 dark:text-white"
                   placeholder="Search or Create..."
                 />
                 {showCategories && existingCategories.length > 0 && (
-                  <div className="mt-2 border rounded-2xl bg-white dark:bg-zinc-900 dark:border-zinc-800 overflow-hidden shadow-2xl">
+                  <div className="mt-2 border rounded-2xl bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 overflow-hidden shadow-2xl">
                     {existingCategories.map((cat, i) => (
                       <div
                         key={i}
                         onClick={() => setCategory(cat)}
-                        className="p-4 text-sm hover:bg-zinc-50 dark:hover:bg-zinc-800 cursor-pointer border-b last:border-0 dark:border-zinc-800"
+                        className="p-4 text-sm hover:bg-zinc-50 dark:hover:bg-zinc-800 cursor-pointer border-b last:border-0 border-zinc-100 dark:border-zinc-800"
                       >
                         {cat}
                       </div>
@@ -283,12 +275,14 @@ export default function CreateNewView({
                 )}
               </div>
               <div>
-                <label className="text-xs font-bold mb-2 block">Slug URL</label>
+                <label className="text-xs font-bold mb-2 block text-zinc-900 dark:text-zinc-200">
+                  Slug URL
+                </label>
                 <input
                   type="text"
                   value={slug}
                   onChange={(e) => setSlug(e.target.value)}
-                  className="w-full p-4 rounded-2xl bg-zinc-100 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 outline-none text-xs text-zinc-500"
+                  className="w-full p-4 rounded-2xl bg-zinc-100 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 outline-none text-xs text-zinc-500"
                 />
               </div>
             </div>
