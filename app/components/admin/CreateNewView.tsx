@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useEffect } from "react";
+import { useState, useTransition, useEffect, useRef } from "react";
 import {
   Bold,
   Italic,
@@ -44,6 +44,7 @@ export default function CreateNewView({
   const [loadingType, setLoadingType] = useState<"Draft" | "Published" | null>(
     null,
   );
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -55,6 +56,16 @@ export default function CreateNewView({
       setSlug(generatedSlug);
     }
   }, [title, initialData]);
+
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      // 1. Reset tinggi ke auto dulu supaya kalau kita hapus teks, tingginya bisa balik menyusut
+      textarea.style.height = "auto";
+      // 2. Set tinggi sesuai dengan scrollHeight (tinggi konten asli di dalamnya)
+      textarea.style.height = `${textarea.scrollHeight}px`;
+    }
+  }, [title]); // Jalan setiap kali title di-update
 
   const editor = useEditor({
     extensions: [StarterKit],
@@ -177,6 +188,7 @@ export default function CreateNewView({
         >
           <div className="max-w-4xl mx-auto py-8 lg:py-12 px-6 lg:px-10">
             <textarea
+              ref={textareaRef}
               placeholder="Post Title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
