@@ -126,7 +126,7 @@ export default function CreateNewView({
           <button
             onClick={() => handleSubmit("Published")}
             disabled={isPending}
-            className="px-5 py-2 text-xs font-bold rounded-full bg-zinc-900 dark:bg-zinc-200 text-black hover:opacity-80 transition-opacity uppercase tracking-wider"
+            className="px-5 py-2 text-xs font-bold rounded-full bg-zinc-900 dark:bg-zinc-200 text-white dark:text-black hover:opacity-80 transition-opacity uppercase tracking-wider"
           >
             Publish
           </button>
