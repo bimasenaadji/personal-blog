@@ -11,12 +11,14 @@ import {
   Image as ImageIcon,
   Type,
   Settings as SettingsIcon,
+  Loader2,
 } from "lucide-react";
 import { createPostAction, updatePostAction } from "@/actions/post.action";
 import Link from "next/link";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 interface CreateNewViewProps {
   existingCategories: string[];
@@ -39,6 +41,10 @@ export default function CreateNewView({
   const [activeTab, setActiveTab] = useState<"write" | "settings">("write");
   const [showCategories, setShowCategories] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const [loadingType, setLoadingType] = useState<"Draft" | "Published" | null>(
+    null,
+  );
+  const router = useRouter();
 
   useEffect(() => {
     if (title && !initialData) {
@@ -68,6 +74,10 @@ export default function CreateNewView({
     if (!content || content === "<p></p>") return toast.error("Konten kosong!");
     if (!category) return toast.error("Pilih kategori!");
 
+    // --- MULAI SIHIR UX ---
+    setLoadingType(clickedStatus); // Set siapa yang lagi kerja
+    const toastId = toast.loading("Processing...");
+
     startTransition(async () => {
       const formData = new FormData();
       formData.append("title", title);
@@ -84,8 +94,17 @@ export default function CreateNewView({
         ? await updatePostAction(initialData.id, formData)
         : await createPostAction(formData);
 
-      if (response?.error) toast.error(response.error);
-      else toast.success(initialData?.id ? "Updated!" : "Saved!");
+      if (response?.error)
+        toast.error(response.error, { id: toastId }); // Ganti loading jadi error
+      else
+        toast.success(
+          initialData?.id ? "Berhasil diupdate!" : "Post berhasil dibuat!",
+          { id: toastId },
+        );
+      setTimeout(() => {
+        router.push("/posts");
+      }, 500);
+      setLoadingType(null);
     });
   };
 
@@ -121,14 +140,16 @@ export default function CreateNewView({
             disabled={isPending}
             className="px-4 py-2 text-xs font-bold rounded-full bg-zinc-200 dark:bg-zinc-800 hover:opacity-80 transition-opacity uppercase tracking-wider text-zinc-900 dark:text-zinc-100"
           >
-            Save Draft
+            {isPending && loadingType === "Draft" ? "Saving..." : "Save Draft"}
           </button>
           <button
             onClick={() => handleSubmit("Published")}
             disabled={isPending}
             className="px-5 py-2 text-xs font-bold rounded-full bg-zinc-900 dark:bg-zinc-200 text-white dark:text-black hover:opacity-80 transition-opacity uppercase tracking-wider"
           >
-            Publish
+            {isPending && loadingType === "Published"
+              ? "Publishing..."
+              : "Publish"}
           </button>
         </div>
       </header>
