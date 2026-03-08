@@ -93,7 +93,7 @@ export default function AllPostsView({
       {/* Filters Bar */}
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         {/* Search */}
-        <div className="relative flex-1 lg:max-w-xs">
+        <div className="relative w-full lg:max-w-xs">
           <Search
             className={`absolute left-3 top-1/2 -translate-y-1/2 transition-colors ${isDarkMode ? "text-muted-foreground" : "text-zinc-500"}`}
             size={18}
@@ -159,7 +159,7 @@ export default function AllPostsView({
         className={`rounded-2xl overflow-hidden border transition-colors ${isDarkMode ? "bg-zinc-900 border-zinc-800" : "bg-white border-zinc-200"}`}
       >
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full min-w-200">
             <thead>
               <tr
                 className={`border-b transition-colors ${isDarkMode ? "border-zinc-800 bg-zinc-900/50" : "border-zinc-200 bg-zinc-50"}`}

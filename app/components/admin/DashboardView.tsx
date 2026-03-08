@@ -57,7 +57,7 @@ export default function DashboardView({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Total Posts */}
         <div
-          className={`rounded-2xl p-6 hover:border-accent/50 transition-colors border ${
+          className={`rounded-2xl p-8 md:p-6 hover:border-accent/50 transition-colors border ${
             isDarkMode
               ? "bg-zinc-900 border-zinc-800"
               : "bg-white border-zinc-200"
@@ -95,7 +95,7 @@ export default function DashboardView({
 
         {/* Published */}
         <div
-          className={`rounded-2xl p-6 hover:border-accent/50 transition-colors border ${
+          className={`rounded-2xl p-8 md:p-6 hover:border-accent/50 transition-colors border ${
             isDarkMode
               ? "bg-zinc-900 border-zinc-800"
               : "bg-white border-zinc-200"
@@ -133,7 +133,7 @@ export default function DashboardView({
 
         {/* Drafts */}
         <div
-          className={`rounded-2xl p-6 hover:border-accent/50 transition-colors border ${
+          className={`rounded-2xl p-8 md:p-6 hover:border-accent/50 transition-colors border ${
             isDarkMode
               ? "bg-zinc-900 border-zinc-800"
               : "bg-white border-zinc-200"
