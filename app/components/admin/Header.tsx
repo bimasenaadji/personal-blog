@@ -1,13 +1,18 @@
 "use client";
 
-import { Sun, Moon, Settings as SettingsIcon } from "lucide-react";
+import { Sun, Moon, Settings as SettingsIcon, LogOut } from "lucide-react";
 
 interface HeaderProps {
   onThemeToggle?: () => void;
   isDarkMode: boolean;
+  handleLogout: () => void;
 }
 
-export default function Header({ onThemeToggle, isDarkMode }: HeaderProps) {
+export default function Header({
+  onThemeToggle,
+  isDarkMode,
+  handleLogout,
+}: HeaderProps) {
   return (
     <header
       className={`border-b sticky top-0 z-40 transition-colors ${
@@ -39,6 +44,13 @@ export default function Header({ onThemeToggle, isDarkMode }: HeaderProps) {
             aria-label="Toggle theme"
           >
             {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+          </button>
+          {/* TOMBOL LOGOUT MOBILE DI SINI */}
+          <button
+            onClick={handleLogout} // Kirim fungsi logout ke Header lewat props
+            className="p-2 rounded-lg md:hidden bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400"
+          >
+            <LogOut size={20} />
           </button>
         </div>
       </div>

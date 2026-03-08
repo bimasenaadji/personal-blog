@@ -8,9 +8,11 @@ import Header from "../components/admin/Header";
 export default function AdminLayoutClient({
   children,
   userProfile,
+  handleLogout,
 }: {
   children: React.ReactNode;
   userProfile: any;
+  handleLogout: () => void;
 }) {
   const [isDarkMode, setIsDarkMode] = useState(false);
 
@@ -24,6 +26,7 @@ export default function AdminLayoutClient({
           <Header
             onThemeToggle={() => setIsDarkMode(!isDarkMode)}
             isDarkMode={isDarkMode}
+            handleLogout={handleLogout}
           />
           <div className="flex-1 p-4 md:p-8">
             {children} {/* Dashboard sekarang ada di dalam lingkungan "dark" */}

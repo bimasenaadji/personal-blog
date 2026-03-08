@@ -4,6 +4,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/db/client";
 import AdminLayoutClient from "./AdminLayoutClient"; // Copy paste kode AdminLayout lo ke file ini
+import { signOutAction } from "@/actions/auth.action";
 
 export default async function Layout({
   children,
@@ -26,6 +27,8 @@ export default async function Layout({
 
   // 2. Langsung lempar ke Client Layout
   return (
-    <AdminLayoutClient userProfile={userProfile}>{children}</AdminLayoutClient>
+    <AdminLayoutClient userProfile={userProfile} handleLogout={signOutAction}>
+      {children}
+    </AdminLayoutClient>
   );
 }
