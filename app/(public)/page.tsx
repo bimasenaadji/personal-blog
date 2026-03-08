@@ -1,7 +1,7 @@
-import React from "react";
-
-const page = () => {
-  return <div></div>;
-};
-
-export default page;
+export default function PublicPage() {
+  return (
+    <main>
+      <h1>Blog Bima Sena Adji</h1>
+    </main>
+  );
+}
