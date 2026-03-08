@@ -22,5 +22,5 @@ export default async function SidebarWrapper({
   }
 
   // 2. Oper ke Sidebar (yang Client Component)
-  return <Sidebar isDarkMode={isDarkMode} userProfile={userProfile} />;
+  return <Sidebar userProfile={userProfile} />;
 }
