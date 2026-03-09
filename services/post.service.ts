@@ -172,3 +172,129 @@ export const PostService = {
     });
   },
 };
+
+// Fungsi helper dipindah ke sini karena ini urusan pengolahan data
+const generateExcerpt = (content: string) => {
+  const strippedContent = content.replace(/(<([^>]+)>)/gi, "");
+  return strippedContent.substring(0, 150) + "...";
+};
+
+// 1. Service untuk mengambil daftar kategori
+export async function getCategories() {
+  const dbCategories = await prisma.category.findMany({
+    select: { name: true },
+  });
+  return ["Semua", ...dbCategories.map((c) => c.name)];
+}
+
+// 2. Service untuk mengambil daftar artikel yang sudah di-publish
+export async function getPublishedPosts() {
+  const dbPosts = await prisma.post.findMany({
+    where: {
+      isPublished: true, // Cuma ambil yang udah rilis
+    },
+    orderBy: {
+      createdAt: "desc", // Urutkan dari yang terbaru
+    },
+    include: {
+      category: true, // Join tabel kategori
+    },
+  });
+
+  // Format datanya langsung di service, biar komponen UI terima beres
+  return dbPosts.map((post) => ({
+    slug: post.slug,
+    title: post.title,
+    excerpt: generateExcerpt(post.content),
+    date: new Intl.DateTimeFormat("id-ID", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    }).format(post.createdAt),
+    category: post.category.name,
+    coverImage: post.coverImage,
+  }));
+}
+
+// 3. Service untuk mengambil SATU artikel berdasarkan SLUG
+export async function getPostBySlug(slug: string) {
+  const post = await prisma.post.findUnique({
+    where: {
+      slug: slug,
+    },
+    include: {
+      category: true, // Ambil nama kategorinya
+      author: true, // Ambil nama penulisnya
+    },
+  });
+
+  if (!post) {
+    return null; // Nanti ditangkap di UI buat nampilin halaman 404
+  }
+
+  // Bikin estimasi waktu baca (Asumsi orang baca 200 kata per menit)
+  const wordCount = post.content.split(/\s+/).length;
+  const readTimeMinutes = Math.ceil(wordCount / 200);
+
+  return {
+    title: post.title,
+    content: post.content, // Nanti kalau pakai editor (misal TipTap/Markdown), content ini berisi HTML
+    coverImage: post.coverImage,
+    date: new Intl.DateTimeFormat("id-ID", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    }).format(post.createdAt),
+    category: post.category.name,
+    authorName: post.author.name || "Bima Sena Adji", // Fallback kalau nama author kosong
+    readTime: `${readTimeMinutes} min read`,
+  };
+}
+
+// 4. Service KHUSUS untuk Navbar Search (Sangat Ringan)
+export async function getSearchPosts() {
+  const posts = await prisma.post.findMany({
+    where: {
+      isPublished: true,
+    },
+    // select ini fungsinya biar Prisma CUMA narik 3 kolom ini aja, nggak narik content HTML yang berat
+    select: {
+      title: true,
+      slug: true,
+      category: {
+        select: {
+          name: true,
+        },
+      },
+    },
+  });
+
+  return posts.map((post) => ({
+    title: post.title,
+    slug: post.slug,
+    category: post.category.name,
+  }));
+}
+
+// 5. Service khusus untuk Landing Page (Narik 3 artikel terbaru)
+export async function getRecentPosts(limit: number = 3) {
+  const dbPosts = await prisma.post.findMany({
+    where: { isPublished: true },
+    orderBy: { createdAt: "desc" },
+    take: limit,
+    include: { category: true },
+  });
+
+  return dbPosts.map((post) => ({
+    slug: post.slug,
+    title: post.title,
+    excerpt: generateExcerpt(post.content), // <--- TAMBAHKAN BARIS INI (Wajib!)
+    date: new Intl.DateTimeFormat("id-ID", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    }).format(post.createdAt),
+    category: post.category.name,
+    coverImage: post.coverImage,
+  }));
+}
