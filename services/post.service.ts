@@ -215,3 +215,38 @@ export async function getPublishedPosts() {
     coverImage: post.coverImage,
   }));
 }
+
+// 3. Service untuk mengambil SATU artikel berdasarkan SLUG
+export async function getPostBySlug(slug: string) {
+  const post = await prisma.post.findUnique({
+    where: {
+      slug: slug,
+    },
+    include: {
+      category: true, // Ambil nama kategorinya
+      author: true, // Ambil nama penulisnya
+    },
+  });
+
+  if (!post) {
+    return null; // Nanti ditangkap di UI buat nampilin halaman 404
+  }
+
+  // Bikin estimasi waktu baca (Asumsi orang baca 200 kata per menit)
+  const wordCount = post.content.split(/\s+/).length;
+  const readTimeMinutes = Math.ceil(wordCount / 200);
+
+  return {
+    title: post.title,
+    content: post.content, // Nanti kalau pakai editor (misal TipTap/Markdown), content ini berisi HTML
+    coverImage: post.coverImage,
+    date: new Intl.DateTimeFormat("id-ID", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    }).format(post.createdAt),
+    category: post.category.name,
+    authorName: post.author.name || "Bima Sena Adji", // Fallback kalau nama author kosong
+    readTime: `${readTimeMinutes} min read`,
+  };
+}
