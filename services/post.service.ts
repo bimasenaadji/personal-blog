@@ -250,3 +250,51 @@ export async function getPostBySlug(slug: string) {
     readTime: `${readTimeMinutes} min read`,
   };
 }
+
+// 4. Service KHUSUS untuk Navbar Search (Sangat Ringan)
+export async function getSearchPosts() {
+  const posts = await prisma.post.findMany({
+    where: {
+      isPublished: true,
+    },
+    // select ini fungsinya biar Prisma CUMA narik 3 kolom ini aja, nggak narik content HTML yang berat
+    select: {
+      title: true,
+      slug: true,
+      category: {
+        select: {
+          name: true,
+        },
+      },
+    },
+  });
+
+  return posts.map((post) => ({
+    title: post.title,
+    slug: post.slug,
+    category: post.category.name,
+  }));
+}
+
+// 5. Service khusus untuk Landing Page (Narik 3 artikel terbaru)
+export async function getRecentPosts(limit: number = 3) {
+  const dbPosts = await prisma.post.findMany({
+    where: { isPublished: true },
+    orderBy: { createdAt: "desc" },
+    take: limit,
+    include: { category: true },
+  });
+
+  return dbPosts.map((post) => ({
+    slug: post.slug,
+    title: post.title,
+    excerpt: generateExcerpt(post.content), // <--- TAMBAHKAN BARIS INI (Wajib!)
+    date: new Intl.DateTimeFormat("id-ID", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    }).format(post.createdAt),
+    category: post.category.name,
+    coverImage: post.coverImage,
+  }));
+}
