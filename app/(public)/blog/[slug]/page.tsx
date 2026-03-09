@@ -1,32 +1,27 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { ArrowLeft, Clock } from "lucide-react";
+import { getPostBySlug } from "@/services/post.service"; // Import service-nya
 
-// Simulasi pengambilan data berdasarkan ID
-// Nanti ini diganti pakai Prisma: await prisma.post.findUnique(...)
-const getMockPost = (id: string) => {
-  return {
-    title: "Bangkit dari Revisi dan Plot Twist Akademis",
-    date: "Maret 8, 2026",
-    category: "Ruang Tumbuh",
-    readTime: "4 min read",
-    content: `
-      Kadang rencana tidak berjalan mulus, tapi di situlah mental kita diuji. Hari ini, ruangan presentasi itu terasa lebih dingin dari biasanya. Ada beberapa catatan tebal yang harus diperbaiki, dan ekspektasi yang tampaknya harus ditata ulang.
-      
-      Gagal atau diminta merevisi di tahap proposal (sempro) bukanlah akhir dari dunia, meskipun rasanya cukup memukul ego. Sebagai mahasiswa Informatika yang terbiasa men-debug kode sampai tengah malam, saya sadar bahwa skripsi ini ibarat sebuah sistem yang sedang mengalami 'runtime error'. 
-      
-      Yang perlu dilakukan bukanlah menutup aplikasinya, melainkan mencari tahu di baris mana logikanya meleset. Saya harus menata ulang jadwal, membagi fokus antara pekerjaan part-time di studio dan target kelulusan ini.
-      
-      Tulisan ini adalah pengingat untuk diri sendiri di masa depan: Bahwa proses mendewasa itu tidak selamanya berjalan lurus. Terkadang kita harus memutar, memperbaiki fondasi, sebelum akhirnya benar-benar siap membangun sesuatu yang besar.
-    `,
-  };
-};
+// PENTING: Karena ini app router versi terbaru, params diakses secara asynchronous (await params)
+export default async function BlogDetail({
+  params,
+}: {
+  params: { slug: string };
+}) {
+  // Tunggu params resolve dulu (Aturan baru Next.js)
+  const resolvedParams = await params;
 
-export default function BlogDetail({ params }: { params: { slug: string } }) {
-  const post = getMockPost(params.slug);
+  // Tarik data asli dari database via Service
+  const post = await getPostBySlug(resolvedParams.slug);
+
+  // Kalau artikel dengan slug tersebut tidak ada di database -> Munculkan halaman 404
+  if (!post) {
+    notFound();
+  }
 
   return (
     <article className="bg-white dark:bg-zinc-950 min-h-screen px-8 py-24 transition-colors duration-300">
-      {/* Lebar artikel dibatasi max-w-2xl atau 3xl agar mata pembaca tidak lelah */}
       <div className="mx-auto max-w-2xl">
         {/* Navigasi Kembali */}
         <Link
@@ -36,9 +31,20 @@ export default function BlogDetail({ params }: { params: { slug: string } }) {
           <ArrowLeft className="w-4 h-4" /> Kembali ke Jejak Tulisan
         </Link>
 
+        {/* Gambar Cover Artikel (Opsional, muncul kalau post.coverImage ada) */}
+        {post.coverImage && (
+          <div className="w-full aspect-video rounded-3xl overflow-hidden mb-12 border border-zinc-200 dark:border-zinc-800">
+            <img
+              src={post.coverImage}
+              alt={`Cover dari ${post.title}`}
+              className="w-full h-full object-cover"
+            />
+          </div>
+        )}
+
         {/* Header Artikel */}
         <header className="mb-12 border-b border-zinc-200 dark:border-zinc-800 pb-10">
-          <div className="flex items-center gap-3 text-sm text-zinc-500 dark:text-zinc-400 font-medium mb-6">
+          <div className="flex flex-wrap items-center gap-3 text-sm text-zinc-500 dark:text-zinc-400 font-medium mb-6">
             <span className="uppercase tracking-widest text-zinc-900 dark:text-zinc-300 font-bold">
               {post.category}
             </span>
@@ -56,12 +62,13 @@ export default function BlogDetail({ params }: { params: { slug: string } }) {
 
           {/* Profil Penulis Singkat */}
           <div className="flex items-center gap-4 mt-8">
-            <div className="w-10 h-10 rounded-full bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center text-lg">
+            <div className="w-10 h-10 rounded-full bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center text-lg overflow-hidden border border-zinc-300 dark:border-zinc-700">
+              {/* Nanti kalau kamu punya avatar di schema User, taruh <img src={user.avatar}> di sini */}
               ☕
             </div>
             <div>
               <p className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
-                Bima Sena Adji
+                {post.authorName}
               </p>
               <p className="text-xs text-zinc-500 dark:text-zinc-400">
                 Penulis & Pengamat
@@ -71,14 +78,8 @@ export default function BlogDetail({ params }: { params: { slug: string } }) {
         </header>
 
         {/* Konten Artikel */}
-        {/* Nanti kalau pakai Markdown/Rich Text, kita pakai plugin Tailwind Typography (prose) */}
         <div className="prose prose-zinc dark:prose-invert max-w-none text-lg leading-loose text-zinc-700 dark:text-zinc-300 transition-colors duration-300">
-          {/* Untuk sementara kita render manual pakai split paragraph karena datanya mock */}
-          {post.content.split("\n\n").map((paragraph, index) => (
-            <p key={index} className="mb-6">
-              {paragraph.trim()}
-            </p>
-          ))}
+          <div dangerouslySetInnerHTML={{ __html: post.content }} />
         </div>
       </div>
     </article>
