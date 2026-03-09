@@ -172,3 +172,46 @@ export const PostService = {
     });
   },
 };
+
+// Fungsi helper dipindah ke sini karena ini urusan pengolahan data
+const generateExcerpt = (content: string) => {
+  const strippedContent = content.replace(/(<([^>]+)>)/gi, "");
+  return strippedContent.substring(0, 150) + "...";
+};
+
+// 1. Service untuk mengambil daftar kategori
+export async function getCategories() {
+  const dbCategories = await prisma.category.findMany({
+    select: { name: true },
+  });
+  return ["Semua", ...dbCategories.map((c) => c.name)];
+}
+
+// 2. Service untuk mengambil daftar artikel yang sudah di-publish
+export async function getPublishedPosts() {
+  const dbPosts = await prisma.post.findMany({
+    where: {
+      isPublished: true, // Cuma ambil yang udah rilis
+    },
+    orderBy: {
+      createdAt: "desc", // Urutkan dari yang terbaru
+    },
+    include: {
+      category: true, // Join tabel kategori
+    },
+  });
+
+  // Format datanya langsung di service, biar komponen UI terima beres
+  return dbPosts.map((post) => ({
+    slug: post.slug,
+    title: post.title,
+    excerpt: generateExcerpt(post.content),
+    date: new Intl.DateTimeFormat("id-ID", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    }).format(post.createdAt),
+    category: post.category.name,
+    coverImage: post.coverImage,
+  }));
+}
