@@ -9,7 +9,15 @@ export async function signUpAction(
   fullName: string,
   email: string,
   password: string,
+  inviteCode: string,
 ) {
+  // Cek apakah kode yang dimasukkan user sama dengan yang ada di brankas .env kita
+  if (inviteCode !== process.env.ADMIN_INVITE_CODE) {
+    return {
+      success: false,
+      message: "Akses Ditolak: Kode rahasia tidak valid!",
+    };
+  }
   try {
     const supabase = await createClient();
 

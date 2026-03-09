@@ -16,6 +16,7 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
   const [password, setPassword] = useState("");
+  const [inviteCode, setInviteCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -24,7 +25,7 @@ export default function RegisterPage() {
     setIsLoading(true);
 
     // Panggil fungsi Server Action yang kita buat tadi
-    const result = await signUpAction(fullName, email, password);
+    const result = await signUpAction(fullName, email, password, inviteCode);
 
     setIsLoading(false);
 
@@ -54,36 +55,6 @@ export default function RegisterPage() {
           Sign up to get admin access
         </p>
       </div>
-
-      {/* Google Sign Up */}
-      {/* <button
-        onClick={handleGoogleSignUp}
-        disabled={isLoading}
-        className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed ${
-          isDarkMode
-            ? "bg-primary text-primary-foreground hover:bg-primary/90"
-            : "bg-zinc-900 text-white hover:bg-zinc-800"
-        }`}
-      >
-        <Chrome size={18} />
-        Sign up with Google
-      </button>
-
-      <div className="flex items-center gap-3">
-        <div
-          className={`flex-1 h-px transition-colors ${isDarkMode ? "bg-border" : "bg-zinc-200"}`}
-        />
-        <span
-          className={`text-xs font-medium transition-colors ${
-            isDarkMode ? "text-muted-foreground" : "text-zinc-500"
-          }`}
-        >
-          OR
-        </span>
-        <div
-          className={`flex-1 h-px transition-colors ${isDarkMode ? "bg-border" : "bg-zinc-200"}`}
-        />
-      </div> */}
 
       <form onSubmit={handleEmailSignUp} className="space-y-8">
         {/* Input Email & Password Sama Persis dengan Login */}
@@ -164,9 +135,40 @@ export default function RegisterPage() {
             </button>
           </div>
         </div>
+        <div className="space-y-2">
+          <label
+            htmlFor="inviteCode"
+            className={`text-sm font-medium transition-colors ${isDarkMode ? "text-foreground" : "text-zinc-900"}`}
+          >
+            Kode Undangan (Wajib)
+          </label>
+          <div className="relative">
+            <Lock
+              className={`absolute left-3 top-1/2 -translate-y-1/2 transition-colors ${isDarkMode ? "text-muted-foreground" : "text-zinc-500"}`}
+              size={18}
+            />
+            <input
+              id="inviteCode"
+              type="password"
+              placeholder="••••••••"
+              value={inviteCode}
+              onChange={(e) => setInviteCode(e.target.value)}
+              className={`w-full pl-10 pr-12 py-3 rounded-lg transition-all focus:outline-none focus:ring-2 ${isDarkMode ? "bg-input border border-border text-foreground placeholder-muted-foreground focus:ring-accent/50" : "bg-zinc-50 border border-zinc-200 text-zinc-900 placeholder-zinc-500 focus:ring-zinc-500/50"}`}
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className={`absolute right-2 top-1/2 -translate-y-1/2 text-sm font-medium transition-colors ${isDarkMode ? "text-muted-foreground hover:text-foreground" : "text-zinc-500 hover:text-zinc-700"}`}
+            >
+              {showPassword ? "Hide" : "Show"}
+            </button>
+          </div>
+        </div>
+
         <button
           type="submit"
-          disabled={isLoading || !email || !password}
+          disabled={isLoading || !email || !password || !inviteCode}
           className={`w-full px-4 py-3 rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
             isDarkMode
               ? "bg-white text-zinc-900 hover:bg-zinc-200"
