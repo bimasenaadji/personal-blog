@@ -1,63 +1,48 @@
 "use client";
 
 import Link from "next/link";
-// Tambahkan ikon FileText untuk hasil pencarian
 import { Search, Sun, Moon, Menu, X, FileText } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
-// Data simulasi untuk fitur Search (Nanti diganti pakai data Prisma)
-const mockPosts = [
-  {
-    slug: "bangkit-revisi-sempro",
-    title: "Bangkit dari Revisi dan Plot Twist Akademis",
-    category: "Ruang Tumbuh",
-  },
-  {
-    slug: "arsitektur-modular-monolith",
-    title: "Kenapa Saya Memilih Modular Monolith di Next.js",
-    category: "Catatan Teknis",
-  },
-  {
-    slug: "teori-mcu-thunderbolts",
-    title: "Prediksi Gila: Siapa Saja yang Bertahan di Thunderbolts?",
-    category: "Pop-Culture",
-  },
-  {
-    slug: "manajemen-waktu-part-time",
-    title: "Seni Membagi Waktu: Kuliah, Part-Time, dan Kewarasan",
-    category: "Ruang Tumbuh",
-  },
-];
+// Tipe data yang dilempar dari Layout (Server)
+export interface SearchPost {
+  title: string;
+  slug: string;
+  category: string;
+}
 
-export default function Navbar() {
+export default function Navbar({
+  searchPosts = [],
+}: {
+  searchPosts?: SearchPost[];
+}) {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // =========================================
-  // STATE BARU KHUSUS SEARCH
-  // =========================================
+  // State UI
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
-
   const pathname = usePathname();
 
+  // Cegah error hydration
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Tutup menu HP atau Search kalau pindah halaman
+  // Tutup menu & reset search kalau pindah halaman
   useEffect(() => {
     setIsMobileMenuOpen(false);
     setIsSearchOpen(false);
-    setSearchQuery(""); // Reset ketikan
+    setSearchQuery("");
   }, [pathname]);
 
-  // Kunci scroll body kalau Menu HP ATAU Search lagi kebuka
+  // Kunci scroll body kalau modal terbuka
   useEffect(() => {
     if (isMobileMenuOpen || isSearchOpen) {
       document.body.style.overflow = "hidden";
@@ -66,17 +51,13 @@ export default function Navbar() {
     }
   }, [isMobileMenuOpen, isSearchOpen]);
 
-  // =========================================
-  // LOGIKA SHORTCUT KEYBOARD (Ctrl+K / Cmd+K / ESC)
-  // =========================================
+  // Logika Shortcut Keyboard (Ctrl+K / Cmd+K / ESC)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Buka search kalau pencet Ctrl+K atau Cmd+K
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
         setIsSearchOpen((prev) => !prev);
       }
-      // Tutup search kalau pencet tombol ESC
       if (e.key === "Escape") {
         setIsSearchOpen(false);
       }
@@ -86,15 +67,15 @@ export default function Navbar() {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  // Auto-focus ke input teks waktu Search Pop-up kebuka
+  // Auto-focus input saat search dibuka
   useEffect(() => {
     if (isSearchOpen && inputRef.current) {
       inputRef.current.focus();
     }
   }, [isSearchOpen]);
 
-  // Filter artikel berdasarkan ketikan user
-  const searchResults = mockPosts.filter(
+  // Filter artikel dari database berdasarkan ketikan user
+  const searchResults = searchPosts.filter(
     (post) =>
       post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       post.category.toLowerCase().includes(searchQuery.toLowerCase()),
@@ -112,6 +93,7 @@ export default function Navbar() {
       <nav className="sticky top-0 z-40 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
+            {/* KIRI: Logo & Mobile Toggle */}
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -121,12 +103,13 @@ export default function Navbar() {
               </button>
               <Link
                 href="/"
-                className="font-black text-lg tracking-tight text-zinc-900 dark:text-zinc-100 hover:opacity-75 transition-opacity"
+                className="font-bold text-lg tracking-tight text-zinc-900 dark:text-zinc-100 hover:opacity-75 transition-opacity"
               >
                 CODE/HEAL
               </Link>
             </div>
 
+            {/* TENGAH: Menu Desktop */}
             <div className="hidden sm:flex items-center gap-8">
               {navLinks.map((link) => (
                 <Link
@@ -143,8 +126,8 @@ export default function Navbar() {
               ))}
             </div>
 
+            {/* KANAN: Search & Theme Toggle */}
             <div className="flex items-center gap-2">
-              {/* TOMBOL SEARCH (Sekarang Berfungsi!) */}
               <button
                 onClick={() => setIsSearchOpen(true)}
                 className="p-2 text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800 rounded-lg transition-colors flex items-center gap-2"
@@ -175,16 +158,24 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* PULL-DOWN MENU (Khusus Mobile) */}
+        {/* MOBILE DROPDOWN MENU */}
         <div
-          className={`sm:hidden absolute top-16 left-0 w-full bg-white dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-800 transition-all duration-300 ease-in-out ${isMobileMenuOpen ? "opacity-100 translate-y-0 visible" : "opacity-0 -translate-y-4 invisible"}`}
+          className={`sm:hidden absolute top-16 left-0 w-full bg-white dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-800 transition-all duration-300 ease-in-out ${
+            isMobileMenuOpen
+              ? "opacity-100 translate-y-0 visible"
+              : "opacity-0 -translate-y-4 invisible"
+          }`}
         >
           <div className="px-4 pt-4 pb-6 space-y-4 shadow-xl">
             {navLinks.map((link) => (
               <Link
                 key={link.name}
                 href={link.href}
-                className={`block px-4 py-3 rounded-xl text-base font-bold transition-colors ${pathname === link.href ? "bg-zinc-100 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100" : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/50"}`}
+                className={`block px-4 py-3 rounded-xl text-base font-bold transition-colors ${
+                  pathname === link.href
+                    ? "bg-zinc-100 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100"
+                    : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
+                }`}
               >
                 {link.name}
               </Link>
@@ -193,20 +184,16 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* =========================================
-          COMMAND PALETTE / SEARCH MODAL
-          ========================================= */}
+      {/* COMMAND PALETTE MODAL */}
       {isSearchOpen && (
         <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 sm:pt-32 px-4">
-          {/* Backdrop Blur (Latar belakang gelap) */}
           <div
             className="fixed inset-0 bg-zinc-900/40 dark:bg-black/60 backdrop-blur-sm transition-opacity"
-            onClick={() => setIsSearchOpen(false)} // Kalau di luar kotak ditekan, tutup!
+            onClick={() => setIsSearchOpen(false)}
           />
 
-          {/* Kotak Search Modal */}
           <div className="relative w-full max-w-xl bg-white dark:bg-zinc-950 rounded-2xl shadow-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            {/* Input Form */}
+            {/* Input Search */}
             <div className="flex items-center px-4 py-4 border-b border-zinc-200 dark:border-zinc-800">
               <Search className="w-5 h-5 text-zinc-400 dark:text-zinc-500 mr-3" />
               <input
@@ -225,15 +212,13 @@ export default function Navbar() {
               </button>
             </div>
 
-            {/* Hasil Pencarian (Search Results) */}
+            {/* Hasil Pencarian */}
             <div className="max-h-[60vh] overflow-y-auto p-2">
               {searchQuery.length === 0 ? (
-                // State awal (Belum ngetik apa-apa)
                 <div className="p-8 text-center text-sm text-zinc-500 dark:text-zinc-400">
                   Mulai ketikkan sesuatu untuk mencari di Taman Digital ini.
                 </div>
               ) : searchResults.length > 0 ? (
-                // State hasil pencarian ketemu
                 <div className="space-y-1">
                   <p className="px-3 py-2 text-xs font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">
                     Artikel Ditemukan
@@ -243,7 +228,7 @@ export default function Navbar() {
                       key={post.slug}
                       onClick={() => {
                         router.push(`/blog/${post.slug}`);
-                        setIsSearchOpen(false); // Tutup modal setelah di-klik
+                        setIsSearchOpen(false);
                       }}
                       className="w-full text-left flex items-start gap-3 px-3 py-3 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors group"
                     >
@@ -262,7 +247,6 @@ export default function Navbar() {
                   ))}
                 </div>
               ) : (
-                // State kalau diketik asal (Nggak ketemu)
                 <div className="p-8 text-center text-sm text-zinc-500 dark:text-zinc-400">
                   Waduh, artikel tentang "
                   <span className="font-bold text-zinc-900 dark:text-zinc-100">
