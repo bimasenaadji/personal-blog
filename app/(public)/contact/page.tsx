@@ -10,7 +10,7 @@ export default function ContactPage() {
             HEADER (The Vibe)
             ========================================= */}
         <div className="mb-16 md:mb-24">
-          <h1 className="text-5xl md:text-7xl font-black mb-6 text-zinc-900 dark:text-zinc-100 tracking-tighter transition-colors duration-300">
+          <h1 className="text-5xl md:text-5xl font-bold mb-6 text-zinc-900 dark:text-zinc-100 tracking-tighter transition-colors duration-300">
             Mari Berbincang.
           </h1>
           <p className="text-xl font-medium text-zinc-500 dark:text-zinc-400 leading-relaxed transition-colors duration-300">
@@ -31,7 +31,7 @@ export default function ContactPage() {
 
             {/* Email Card */}
             <a
-              href="mailto:emailkamu@gmail.com"
+              href="mailto:bimasenaadjis@gmail.com"
               className="group flex items-center gap-4 p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 transition-all duration-300"
             >
               <div className="w-10 h-10 rounded-full bg-white dark:bg-zinc-800 flex items-center justify-center border border-zinc-200 dark:border-zinc-700 group-hover:scale-110 transition-transform">
@@ -49,7 +49,7 @@ export default function ContactPage() {
 
             {/* GitHub Card */}
             <a
-              href="https://github.com/username-kamu"
+              href="https://github.com/bimasenaadji"
               target="_blank"
               rel="noreferrer"
               className="group flex items-center gap-4 p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 transition-all duration-300"
@@ -69,7 +69,7 @@ export default function ContactPage() {
 
             {/* LinkedIn Card */}
             <a
-              href="https://linkedin.com/in/username-kamu"
+              href="https://www.linkedin.com/in/bimasenaadji/"
               target="_blank"
               rel="noreferrer"
               className="group flex items-center gap-4 p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 transition-all duration-300"
