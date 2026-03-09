@@ -1,7 +1,10 @@
+import { getRecentPosts } from "@/services/post.service";
 import { ArrowRight, Code2, Sprout, Popcorn } from "lucide-react";
 import Link from "next/link";
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  // Panggil service untuk menarik 3 artikel terbaru
+  const recentPosts = await getRecentPosts(3);
   return (
     // Tambahkan dark:bg-zinc-950 sebagai fondasi gelap
     <div className="bg-white dark:bg-zinc-950 transition-colors duration-300">
@@ -128,7 +131,7 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* Jejak Tulisan */}
+        {/* Jejak Tulisan (Tarik dari Prisma!) */}
         <div className="px-8 py-24 mx-auto max-w-7xl" id="jejak-tulisan">
           <div className="flex items-center justify-between mb-12">
             <div>
@@ -145,59 +148,53 @@ export default function LandingPage() {
           </div>
 
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {/* Card Artikel 1 */}
-            <article className="group cursor-pointer flex flex-col gap-4">
-              <div className="aspect-[4/3] w-full rounded-2xl bg-zinc-100 dark:bg-zinc-900 overflow-hidden border border-zinc-200 dark:border-zinc-800 transition-colors duration-300">
-                {/* Gradient image placeholder dibikin beda buat dark mode biar nggak norak */}
-                <div className="w-full h-full bg-gradient-to-br from-zinc-200 to-zinc-300 dark:from-zinc-800 dark:to-zinc-900 group-hover:scale-105 transition-transform duration-500" />
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center gap-3 text-xs text-zinc-500 dark:text-zinc-400 font-medium transition-colors duration-300">
-                  <time>Maret 8, 2026</time>
-                  <span>•</span>
-                  <span className="uppercase tracking-wider">Ruang Tumbuh</span>
-                </div>
-                <h3 className="text-xl font-bold leading-tight text-zinc-900 dark:text-zinc-100 group-hover:text-zinc-600 dark:group-hover:text-zinc-400 transition-colors duration-300">
-                  Bangkit dari Revisi dan Plot Twist Akademis
-                </h3>
-              </div>
-            </article>
+            {recentPosts.length > 0 ? (
+              recentPosts.map((post) => (
+                <article
+                  key={post.slug}
+                  className="group cursor-pointer flex flex-col gap-4"
+                >
+                  <Link href={`/blog/${post.slug}`} className="block h-full">
+                    {/* Kotak Gambar */}
+                    <div className="aspect-[4/3] w-full rounded-2xl bg-zinc-100 dark:bg-zinc-900 overflow-hidden border border-zinc-200 dark:border-zinc-800 transition-colors duration-300 relative">
+                      {post.coverImage ? (
+                        <img
+                          src={post.coverImage}
+                          alt={post.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-zinc-200 to-zinc-300 dark:from-zinc-800 dark:to-zinc-900 group-hover:scale-105 transition-transform duration-500" />
+                      )}
+                    </div>
 
-            {/* Card Artikel 2 */}
-            <article className="group cursor-pointer flex flex-col gap-4">
-              <div className="aspect-[4/3] w-full rounded-2xl bg-zinc-100 dark:bg-zinc-900 overflow-hidden border border-zinc-200 dark:border-zinc-800 transition-colors duration-300">
-                <div className="w-full h-full bg-gradient-to-br from-zinc-200 to-zinc-300 dark:from-zinc-800 dark:to-zinc-900 group-hover:scale-105 transition-transform duration-500" />
+                    {/* Teks Artikel */}
+                    <div className="space-y-2 mt-5">
+                      <div className="flex items-center gap-3 text-xs text-zinc-500 dark:text-zinc-400 font-medium transition-colors duration-300">
+                        <time>{post.date}</time>
+                        <span>•</span>
+                        <span className="uppercase tracking-wider font-bold text-zinc-700 dark:text-zinc-300">
+                          {post.category}
+                        </span>
+                      </div>
+                      <h3 className="text-xl font-bold leading-tight text-zinc-900 dark:text-zinc-100 group-hover:text-zinc-600 dark:group-hover:text-zinc-400 transition-colors duration-300 line-clamp-2">
+                        {post.title}
+                      </h3>
+                      <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                        {post.excerpt}
+                      </p>
+                    </div>
+                  </Link>
+                </article>
+              ))
+            ) : (
+              // Empty State kalau database masih kosong
+              <div className="col-span-full py-12 text-center border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-2xl">
+                <p className="text-zinc-500 dark:text-zinc-400 font-medium">
+                  Belum ada jejak tulisan yang ditinggalkan.
+                </p>
               </div>
-              <div className="space-y-2">
-                <div className="flex items-center gap-3 text-xs text-zinc-500 dark:text-zinc-400 font-medium transition-colors duration-300">
-                  <time>Februari 28, 2026</time>
-                  <span>•</span>
-                  <span className="uppercase tracking-wider">
-                    Catatan Teknis
-                  </span>
-                </div>
-                <h3 className="text-xl font-bold leading-tight text-zinc-900 dark:text-zinc-100 group-hover:text-zinc-600 dark:group-hover:text-zinc-400 transition-colors duration-300">
-                  Kenapa Saya Memilih Modular Monolith di Next.js
-                </h3>
-              </div>
-            </article>
-
-            {/* Card Artikel 3 */}
-            <article className="group cursor-pointer flex flex-col gap-4">
-              <div className="aspect-[4/3] w-full rounded-2xl bg-zinc-100 dark:bg-zinc-900 overflow-hidden border border-zinc-200 dark:border-zinc-800 transition-colors duration-300">
-                <div className="w-full h-full bg-gradient-to-br from-zinc-200 to-zinc-300 dark:from-zinc-800 dark:to-zinc-900 group-hover:scale-105 transition-transform duration-500" />
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center gap-3 text-xs text-zinc-500 dark:text-zinc-400 font-medium transition-colors duration-300">
-                  <time>Februari 15, 2026</time>
-                  <span>•</span>
-                  <span className="uppercase tracking-wider">Pop-Culture</span>
-                </div>
-                <h3 className="text-xl font-bold leading-tight text-zinc-900 dark:text-zinc-100 group-hover:text-zinc-600 dark:group-hover:text-zinc-400 transition-colors duration-300">
-                  Prediksi Gila: Siapa Saja yang Bertahan di Thunderbolts?
-                </h3>
-              </div>
-            </article>
+            )}
           </div>
         </div>
       </section>
