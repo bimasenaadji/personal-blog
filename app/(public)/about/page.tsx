@@ -18,10 +18,10 @@ export default function AboutPage() {
             HEADER: JUDUL & LOKASI
             ========================================= */}
         <div className="mb-12 md:mb-16">
-          <h1 className="text-5xl md:text-7xl font-black mb-6 text-zinc-900 dark:text-zinc-100 tracking-tighter transition-colors duration-300">
+          <h1 className="text-5xl md:text57xl font-bold mb-6 text-zinc-900 dark:text-zinc-100 tracking-tighter transition-colors duration-300">
             Di Balik Layar.
           </h1>
-          <p className="text-xl font-medium text-zinc-500 dark:text-zinc-400 leading-relaxed transition-colors duration-300 flex items-center gap-2">
+          <p className="text-lg font-medium text-zinc-500 dark:text-zinc-400 leading-relaxed transition-colors duration-300 flex items-center gap-2">
             <MapPin className="w-5 h-5 text-zinc-400" /> Surabaya, Indonesia
           </p>
         </div>
