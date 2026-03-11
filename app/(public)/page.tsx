@@ -1,5 +1,6 @@
 import { getRecentPosts } from "@/services/post.service";
 import { ArrowRight, Code2, Sprout, Popcorn } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 
 export default async function LandingPage() {
@@ -18,7 +19,13 @@ export default async function LandingPage() {
                 {/* Background placeholder disesuaikan untuk dark mode */}
                 <div className="w-full h-full bg-zinc-100 dark:bg-zinc-900 rounded-3xl flex items-center justify-center border border-zinc-200 dark:border-zinc-800 transition-all duration-500 group-hover:-translate-y-2 group-hover:shadow-xl dark:group-hover:shadow-zinc-900/50 overflow-hidden">
                   <div className="text-zinc-400 dark:text-zinc-600 font-medium text-sm tracking-widest uppercase">
-                    [ Foto Bima ]
+                    <Image
+                      src="/images/profile-hero.jpeg"
+                      alt="Bima Sena Adji"
+                      width={256}
+                      height={256}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                 </div>
               </div>
