@@ -14,6 +14,8 @@ export async function deletePostAction(id: string) {
     // Keajaiban Next.js: Perintahkan Next.js untuk me-refresh data di halaman '/posts'
     // secara otomatis tanpa harus me-reload browser secara penuh!
     revalidatePath("/posts");
+    revalidatePath("/blog");
+    revalidatePath("/");
 
     return { success: true };
   } catch (error) {
