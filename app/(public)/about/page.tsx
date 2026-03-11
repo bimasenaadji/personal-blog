@@ -31,28 +31,13 @@ export default function AboutPage() {
             ========================================= */}
         <div className="mb-16 md:mb-20">
           <div className="aspect-[16/9] md:aspect-[21/9] w-full rounded-3xl bg-zinc-100 dark:bg-zinc-900 overflow-hidden border border-zinc-200 dark:border-zinc-800 transition-colors duration-300 relative group shadow-inner">
-            {/* TODO: JIKA SUDAH ADA FOTO, HAPUS DIV PLACEHOLDER DI BAWAH & NYALAKAN KODE <Image> INI */}
-            {/* Pastikan foto ditaruh di folder /public/images/bima-banner.jpg */}
-            {/* <Image 
-              src="/images/bima-banner.jpg" 
-              alt="Bima Sena Adji - Banner Profile" 
-              fill 
-              className="object-cover group-hover:scale-105 transition-transform duration-700 ease-in-out" 
+            <Image
+              src="/images/about-section.jpeg"
+              alt="Bima Sena Adji - Banner Profile"
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-700 ease-in-out"
               priority
-            /> 
-            */}
-
-            {/* DIV PLACEHOLDER (Sementara) */}
-            <div className="w-full h-full bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-900 dark:to-zinc-800/50 flex items-center justify-center">
-              <div className="text-center space-y-2">
-                <span className="text-zinc-400 dark:text-zinc-600 font-mono text-sm tracking-widest uppercase">
-                  [ Banner Foto Lebar Bima ]
-                </span>
-                <p className="text-xs text-zinc-500 dark:text-zinc-700">
-                  Rekomendasi ukuran: 21:9 (Sangat Lebar)
-                </p>
-              </div>
-            </div>
+            />
 
             {/* Overlay Gradient Halus agar terlihat mahal */}
             <div className="absolute inset-0 bg-black/5 dark:bg-black/10" />
@@ -70,7 +55,7 @@ export default function AboutPage() {
               <strong className="text-zinc-900 dark:text-zinc-100 font-bold">
                 Bima Sena Adji
               </strong>
-              . Saat ini saya adalah mahasiswa Informatika semester 7 di UPN
+              . Saat ini saya adalah mahasiswa Informatika semester 8 di UPN
               Veteran Jatim. Sebagian besar waktu saya habiskan di depan
               layar—baik untuk menyelesaikan <i>bug</i> di kode, maupun sekadar
               membaca dokumentasi teknologi terbaru.
@@ -124,8 +109,7 @@ export default function AboutPage() {
               <Heart className="w-5 h-5 text-red-500" />
               <span>
                 Pada akhirnya, semua kerja keras ini memiliki satu tujuan
-                sederhana: membangun masa depan yang lebih baik untuk keluarga
-                dan Amanda.
+                sederhana: membangun masa depan yang lebih baik untuk keluarga.
               </span>
             </p>
           </div>
