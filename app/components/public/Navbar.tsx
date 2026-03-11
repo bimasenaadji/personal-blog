@@ -6,7 +6,6 @@ import { useTheme } from "next-themes";
 import { useEffect, useState, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
-// Tipe data yang dilempar dari Layout (Server)
 export interface SearchPost {
   title: string;
   slug: string;
