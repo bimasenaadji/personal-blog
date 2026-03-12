@@ -78,8 +78,13 @@ export default async function BlogDetail({
         </header>
 
         {/* Konten Artikel */}
-        <div className="prose prose-zinc dark:prose-invert max-w-none text-lg leading-loose text-zinc-700 dark:text-zinc-300 transition-colors duration-300">
-          <div dangerouslySetInnerHTML={{ __html: post.content }} />
+        <div className="prose prose-zinc dark:prose-invert max-w-none text-lg leading-loose text-zinc-700 dark:text-zinc-300 transition-colors duration-300 [&>p]:indent-8 [&>p]:mb-6">
+          <div
+            dangerouslySetInnerHTML={{
+              // Sihir Regex: Ubah <p></p> kosong menjadi tag baris baru <br />
+              __html: post.content?.replace(/<p><\/p>/g, "<br />") || "",
+            }}
+          />
         </div>
       </div>
     </article>
